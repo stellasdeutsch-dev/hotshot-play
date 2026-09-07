@@ -1,21 +1,31 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Flame, LogIn, MailCheck, UserPlus, Building2 } from "lucide-react";
+import { Building2, Eye, EyeOff, KeyRound, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 import { HOME_BY_ROLE, useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LogoMark } from "@/components/Logo";
+
+type Mode = "signin" | "signup" | "reset" | "newPassword";
+type Kind = "player" | "club";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>): { mode?: "signup" | "club" | "reset" } => {
+    const m = s["mode"];
+    return m === "signup" || m === "club" || m === "reset" ? { mode: m } : {};
+  },
   head: () => ({
     meta: [
       { title: "Вход и регистрация — HotShot Play" },
       {
         name: "description",
-        content: "Регистрация игроков по почте и подача заявки клуба на подключение к HotShot Play.",
+        content:
+          "Регистрация игроков по почте и подача заявки клуба на подключение к HotShot Play.",
       },
       { property: "og:title", content: "HotShot Play — вход и регистрация" },
       { property: "og:description", content: "Один аккаунт для игроков, клубов и владельцев." },
@@ -26,97 +36,148 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { login, registerPlayer, registerClub, resendConfirmation, user } = useAuth();
+  const search = Route.useSearch();
+  const {
+    login,
+    registerPlayer,
+    registerClub,
+    resendConfirmation,
+    resetPassword,
+    updatePassword,
+    user,
+  } = useAuth();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<Mode>(
+    search.mode === "signup" || search.mode === "club"
+      ? "signup"
+      : search.mode === "reset"
+        ? "reset"
+        : "signin",
+  );
+  const [kind, setKind] = useState<Kind>(search.mode === "club" ? "club" : "player");
   const [busy, setBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
-  const [sentKind, setSentKind] = useState<"player" | "club">("player");
+  const [sentKind, setSentKind] = useState<Kind>("player");
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("confirmed") === "1") {
-      toast.success(t("auth.confirmed"));
-    }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("confirmed") === "1") toast.success(t("auth.confirmed"));
+    if (params.get("reset") === "1") setMode("newPassword");
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setMode("newPassword");
+    });
+    return () => data.subscription.unsubscribe();
   }, [t]);
 
   useEffect(() => {
-    if (user) navigate({ to: HOME_BY_ROLE[user.role] });
-  }, [user, navigate]);
+    if (user && mode !== "newPassword") navigate({ to: HOME_BY_ROLE[user.role] });
+  }, [user, mode, navigate]);
 
   if (sentTo) {
     return (
-      <div className="mx-auto max-w-md">
-        <div className="neon-panel p-8 text-center">
-          <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/20 neon-glow">
-            <MailCheck className="size-6 text-primary" />
-          </span>
-          <h1 className="font-display mt-4 text-xl font-bold">{t("auth.checkEmail")}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("auth.checkEmailHint", { email: sentTo })}
+      <Frame>
+        <span className="mx-auto grid size-14 place-items-center rounded-full bg-lime text-lime-foreground">
+          <MailCheck className="size-7" />
+        </span>
+        <h1 className="font-display mt-4 text-center text-2xl font-extrabold">
+          {t("auth.checkEmail")}
+        </h1>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          {t("auth.checkEmailHint", { email: sentTo })}
+        </p>
+        {sentKind === "club" && (
+          <p className="mt-2 text-center text-sm text-muted-foreground">
+            {t("auth.checkEmailClub")}
           </p>
-          {sentKind === "club" && (
-            <p className="mt-2 text-sm text-muted-foreground">{t("auth.checkEmailClub")}</p>
-          )}
-          <div className="mt-6 grid gap-2">
-            <Button
-              variant="secondary"
-              disabled={busy}
-              onClick={async () => {
-                setBusy(true);
-                const res = await resendConfirmation(sentTo);
-                setBusy(false);
-                if (res.ok) toast.success(t("auth.resent"));
-                else toast.error(res.error ?? t("auth.invalid"));
-              }}
-            >
-              {t("auth.resend")}
-            </Button>
-            <Button variant="ghost" onClick={() => setSentTo(null)}>
-              {t("auth.backToSignin")}
-            </Button>
-          </div>
+        )}
+        <div className="mt-6 grid gap-2">
+          <Button
+            variant="secondary"
+            size="lg"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              const res = await resendConfirmation(sentTo);
+              setBusy(false);
+              if (res.ok) toast.success(t("auth.resent"));
+              else toast.error(res.error ?? t("auth.invalid"));
+            }}
+          >
+            {t("auth.resend")}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setSentTo(null);
+              setMode("signin");
+            }}
+          >
+            {t("auth.backToSignin")}
+          </Button>
         </div>
-      </div>
+      </Frame>
     );
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <div className="neon-panel p-6 sm:p-8">
-        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/20 neon-glow">
-          <Flame className="size-6 text-primary" />
-        </span>
-        <h1 className="font-display mt-4 text-center text-xl font-bold">{t("auth.title")}</h1>
+    <Frame>
+      <div className="flex justify-center">
+        <LogoMark className="size-20" />
+      </div>
+      <h1 className="font-display mt-5 text-center text-3xl font-extrabold">
+        {mode === "signin" && t("auth.login")}
+        {mode === "signup" && t("auth.signup")}
+        {mode === "reset" && t("auth.resetTitle")}
+        {mode === "newPassword" && t("auth.newPassword")}
+      </h1>
+      {mode === "signin" && (
         <p className="mt-1 text-center text-sm text-muted-foreground">{t("auth.subtitle")}</p>
+      )}
+      {mode === "reset" && (
+        <p className="mt-1 text-center text-sm text-muted-foreground">{t("auth.resetHint")}</p>
+      )}
 
-        <Tabs defaultValue="signin" className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="signin">{t("auth.tab.signin")}</TabsTrigger>
-            <TabsTrigger value="player">{t("auth.tab.player")}</TabsTrigger>
-            <TabsTrigger value="club">{t("auth.tab.club")}</TabsTrigger>
-          </TabsList>
+      {mode === "signin" && (
+        <SignInForm
+          busy={busy}
+          onForgot={() => setMode("reset")}
+          onSubmit={async (email, password) => {
+            setBusy(true);
+            const res = await login(email, password);
+            setBusy(false);
+            if (!res.ok) {
+              toast.error(res.error === "unconfirmed" ? t("auth.unconfirmed") : t("auth.invalid"));
+              if (res.error === "unconfirmed") {
+                setSentKind("player");
+                setSentTo(email);
+              }
+              return;
+            }
+            toast.success(t("auth.welcome"));
+          }}
+        />
+      )}
 
-          <TabsContent value="signin" className="mt-5">
-            <SignInForm
-              busy={busy}
-              onSubmit={async (email, password) => {
-                setBusy(true);
-                const res = await login(email, password);
-                setBusy(false);
-                if (!res.ok) {
-                  toast.error(res.error === "unconfirmed" ? t("auth.unconfirmed") : t("auth.invalid"));
-                  if (res.error === "unconfirmed") {
-                    setSentKind("player");
-                    setSentTo(email);
-                  }
-                  return;
-                }
-                toast.success(t("auth.welcome"));
-              }}
-            />
-          </TabsContent>
-
-          <TabsContent value="player" className="mt-5">
+      {mode === "signup" && (
+        <>
+          <div className="mt-6 flex rounded-full bg-surface p-1 text-sm font-bold" role="tablist">
+            {(["player", "club"] as Kind[]).map((k) => (
+              <button
+                key={k}
+                role="tab"
+                aria-selected={kind === k}
+                onClick={() => setKind(k)}
+                className={cn(
+                  "flex-1 rounded-full py-2.5 transition-all",
+                  kind === k ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                )}
+              >
+                {k === "player" ? t("auth.asPlayer") : t("auth.asClub")}
+              </button>
+            ))}
+          </div>
+          {kind === "player" ? (
             <PlayerForm
               busy={busy}
               onSubmit={async (input) => {
@@ -135,9 +196,7 @@ function AuthPage() {
                 }
               }}
             />
-          </TabsContent>
-
-          <TabsContent value="club" className="mt-5">
+          ) : (
             <ClubForm
               busy={busy}
               onSubmit={async (input) => {
@@ -152,19 +211,88 @@ function AuthPage() {
                 setSentTo(input.email);
               }}
             />
-          </TabsContent>
-        </Tabs>
-      </div>
+          )}
+        </>
+      )}
 
+      {mode === "reset" && (
+        <ResetForm
+          busy={busy}
+          onSubmit={async (email) => {
+            setBusy(true);
+            const res = await resetPassword(email);
+            setBusy(false);
+            if (!res.ok) {
+              toast.error(res.error ?? t("auth.invalid"));
+              return;
+            }
+            toast.success(t("auth.resetSent"));
+            setMode("signin");
+          }}
+        />
+      )}
+
+      {mode === "newPassword" && (
+        <NewPasswordForm
+          busy={busy}
+          onSubmit={async (password) => {
+            setBusy(true);
+            const res = await updatePassword(password);
+            setBusy(false);
+            if (!res.ok) {
+              toast.error(res.error ?? t("auth.invalid"));
+              return;
+            }
+            toast.success(t("auth.passwordUpdated"));
+            window.history.replaceState(null, "", "/auth");
+            setMode("signin");
+            if (user) navigate({ to: HOME_BY_ROLE[user.role] });
+          }}
+        />
+      )}
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {mode === "signin" ? (
+          <>
+            {t("auth.noAccount")}{" "}
+            <button
+              className="font-bold text-primary hover:underline"
+              onClick={() => setMode("signup")}
+            >
+              {t("auth.signupLink")}
+            </button>
+          </>
+        ) : (
+          <>
+            {t("auth.haveAccount")}{" "}
+            <button
+              className="font-bold text-primary hover:underline"
+              onClick={() => setMode("signin")}
+            >
+              {t("auth.signinLink")}
+            </button>
+          </>
+        )}
+      </p>
+    </Frame>
+  );
+}
+
+function Frame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto max-w-md">
+      <div className="ca-card ca-rise p-6 sm:p-8">{children}</div>
     </div>
   );
 }
 
 function SignInForm({
   busy,
+  onForgot,
   onSubmit,
 }: {
   busy: boolean;
+  onForgot: () => void;
   onSubmit: (email: string, password: string) => Promise<void>;
 }) {
   const { t } = useI18n();
@@ -173,16 +301,107 @@ function SignInForm({
 
   return (
     <form
-      className="space-y-4"
+      className="mt-6 space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         void onSubmit(email, password);
       }}
     >
-      <Field id="email" label={t("auth.email")} type="email" value={email} onChange={setEmail} placeholder="you@example.kz" />
-      <Field id="password" label={t("auth.password")} type="password" value={password} onChange={setPassword} placeholder="••••••" />
-      <Button type="submit" className="w-full neon-glow" disabled={busy}>
-        <LogIn className="size-4" /> {busy ? t("auth.loading") : t("auth.signin")}
+      <Field
+        id="email"
+        label={t("auth.account")}
+        type="email"
+        value={email}
+        onChange={setEmail}
+        placeholder="you@example.kz"
+        autoComplete="email"
+      />
+      <PasswordField
+        id="password"
+        label={t("auth.password")}
+        value={password}
+        onChange={setPassword}
+        autoComplete="current-password"
+      />
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={onForgot}
+          className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+        >
+          {t("auth.forgot")}
+        </button>
+      </div>
+      <Button type="submit" className="mt-2 w-full" size="lg" disabled={busy}>
+        {busy ? t("auth.loading") : t("auth.signin")}
+      </Button>
+    </form>
+  );
+}
+
+function ResetForm({
+  busy,
+  onSubmit,
+}: {
+  busy: boolean;
+  onSubmit: (email: string) => Promise<void>;
+}) {
+  const { t } = useI18n();
+  const [email, setEmail] = useState("");
+  return (
+    <form
+      className="mt-6 space-y-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void onSubmit(email);
+      }}
+    >
+      <Field
+        id="r-email"
+        label={t("auth.email")}
+        type="email"
+        value={email}
+        onChange={setEmail}
+        placeholder="you@example.kz"
+        autoComplete="email"
+      />
+      <Button type="submit" className="mt-2 w-full" size="lg" disabled={busy}>
+        <KeyRound className="size-4" /> {busy ? t("auth.loading") : t("auth.resetSend")}
+      </Button>
+    </form>
+  );
+}
+
+function NewPasswordForm({
+  busy,
+  onSubmit,
+}: {
+  busy: boolean;
+  onSubmit: (password: string) => Promise<void>;
+}) {
+  const { t } = useI18n();
+  const [password, setPassword] = useState("");
+  return (
+    <form
+      className="mt-6 space-y-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (password.length < 6) {
+          toast.error(t("auth.weakPassword"));
+          return;
+        }
+        void onSubmit(password);
+      }}
+    >
+      <PasswordField
+        id="new-pass"
+        label={t("auth.newPassword")}
+        value={password}
+        onChange={setPassword}
+        autoComplete="new-password"
+      />
+      <Button type="submit" className="mt-2 w-full" size="lg" disabled={busy}>
+        {busy ? t("auth.loading") : t("auth.setPassword")}
       </Button>
     </form>
   );
@@ -193,15 +412,27 @@ function PlayerForm({
   onSubmit,
 }: {
   busy: boolean;
-  onSubmit: (input: { name: string; email: string; password: string; phone: string; city: string }) => Promise<void>;
+  onSubmit: (input: {
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+    city: string;
+  }) => Promise<void>;
 }) {
   const { t } = useI18n();
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "", city: "Astana" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    phone: "",
+    city: "Astana",
+  });
   const set = (k: keyof typeof form) => (v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   return (
     <form
-      className="space-y-4"
+      className="mt-5 space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         if (form.password.length < 6) {
@@ -212,15 +443,49 @@ function PlayerForm({
       }}
     >
       <p className="text-xs text-muted-foreground">{t("auth.playerHint")}</p>
-      <Field id="p-name" label={t("auth.name")} value={form.name} onChange={set("name")} placeholder="Dastan Y." />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="p-phone" label={t("auth.phone")} value={form.phone} onChange={set("phone")} placeholder="+7 701 000 00 00" />
-        <Field id="p-city" label={t("auth.city")} value={form.city} onChange={set("city")} placeholder="Astana" />
+      <Field
+        id="p-name"
+        label={t("auth.nickname")}
+        value={form.name}
+        onChange={set("name")}
+        placeholder="Dastan Y."
+        autoComplete="name"
+      />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field
+          id="p-phone"
+          label={t("auth.phone")}
+          value={form.phone}
+          onChange={set("phone")}
+          placeholder="+7 701 000 00 00"
+          autoComplete="tel"
+        />
+        <Field
+          id="p-city"
+          label={t("auth.city")}
+          value={form.city}
+          onChange={set("city")}
+          placeholder="Astana"
+        />
       </div>
-      <Field id="p-email" label={t("auth.email")} type="email" value={form.email} onChange={set("email")} placeholder="you@example.kz" />
-      <Field id="p-pass" label={t("auth.password")} type="password" value={form.password} onChange={set("password")} placeholder="••••••" />
-      <Button type="submit" className="w-full neon-glow" disabled={busy}>
-        <UserPlus className="size-4" /> {busy ? t("auth.loading") : t("auth.register")}
+      <Field
+        id="p-email"
+        label={t("auth.email")}
+        type="email"
+        value={form.email}
+        onChange={set("email")}
+        placeholder="you@example.kz"
+        autoComplete="email"
+      />
+      <PasswordField
+        id="p-pass"
+        label={t("auth.password")}
+        value={form.password}
+        onChange={set("password")}
+        autoComplete="new-password"
+      />
+      <Button type="submit" className="mt-2 w-full" size="lg" disabled={busy}>
+        {busy ? t("auth.loading") : t("auth.register")}
       </Button>
     </form>
   );
@@ -256,7 +521,7 @@ function ClubForm({
 
   return (
     <form
-      className="space-y-4"
+      className="mt-5 space-y-3"
       onSubmit={(e) => {
         e.preventDefault();
         if (owner.password.length < 6) {
@@ -281,18 +546,44 @@ function ClubForm({
       }}
     >
       <p className="text-xs text-muted-foreground">{t("auth.clubHint")}</p>
-      <Field id="c-name" label={t("auth.clubName")} value={owner.name} onChange={setO("name")} placeholder="CyberDome" />
-      <Field id="o-email" label={t("auth.email")} type="email" value={owner.email} onChange={setO("email")} placeholder="owner@club.kz" />
-      <Field id="o-phone" label={t("auth.phone")} value={owner.phone} onChange={setO("phone")} placeholder="+7 702 000 00 00" />
-      <Field id="o-pass" label={t("auth.password")} type="password" value={owner.password} onChange={setO("password")} placeholder="••••••" />
-
-      <Button type="submit" className="w-full neon-glow" disabled={busy}>
+      <Field
+        id="c-name"
+        label={t("auth.clubName")}
+        value={owner.name}
+        onChange={setO("name")}
+        placeholder="CyberDome"
+        autoComplete="organization"
+      />
+      <Field
+        id="o-email"
+        label={t("auth.email")}
+        type="email"
+        value={owner.email}
+        onChange={setO("email")}
+        placeholder="owner@club.kz"
+        autoComplete="email"
+      />
+      <Field
+        id="o-phone"
+        label={t("auth.phone")}
+        value={owner.phone}
+        onChange={setO("phone")}
+        placeholder="+7 702 000 00 00"
+        autoComplete="tel"
+      />
+      <PasswordField
+        id="o-pass"
+        label={t("auth.password")}
+        value={owner.password}
+        onChange={setO("password")}
+        autoComplete="new-password"
+      />
+      <Button type="submit" className="mt-2 w-full" size="lg" disabled={busy}>
         <Building2 className="size-4" /> {busy ? t("auth.loading") : t("auth.registerClub")}
       </Button>
     </form>
   );
 }
-
 
 function Field({
   id,
@@ -301,6 +592,7 @@ function Field({
   onChange,
   type = "text",
   placeholder,
+  autoComplete,
 }: {
   id: string;
   label: string;
@@ -308,18 +600,65 @@ function Field({
   onChange: (v: string) => void;
   type?: string;
   placeholder?: string;
+  autoComplete?: string;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id} className="pl-1">
+        {label}
+      </Label>
       <Input
         id={id}
         type={type}
         value={value}
         placeholder={placeholder ?? ""}
         onChange={(e) => onChange(e.target.value)}
+        autoComplete={autoComplete}
         required
       />
+    </div>
+  );
+}
+
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  autoComplete,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoComplete?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id} className="pl-1">
+        {label}
+      </Label>
+      <div className="relative">
+        <Input
+          id={id}
+          type={show ? "text" : "password"}
+          value={value}
+          placeholder="••••••••"
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          className="pr-12"
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setShow((v) => !v)}
+          aria-label={show ? "hide" : "show"}
+          className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted-foreground hover:text-foreground"
+        >
+          {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
     </div>
   );
 }

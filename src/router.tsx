@@ -5,8 +5,12 @@ import { routeTree } from "./routeTree.gen";
 export const getRouter = () => {
   const queryClient = new QueryClient();
 
+  // Static builds live under a sub-path (e.g. GitHub Pages /hotshot-play/).
+  const basepath = import.meta.env.BASE_URL.replace(/\/$/, "") || "/";
+
   const router = createRouter({
     routeTree,
+    basepath,
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,

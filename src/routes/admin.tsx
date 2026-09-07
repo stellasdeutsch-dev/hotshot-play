@@ -5,7 +5,15 @@ import type { DbRole } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Building2, Receipt, ShieldCheck, Ticket, Users, Wallet, Ban } from "lucide-react";
 import { toast } from "sonner";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useStore } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { kzt, last7Days, type ClubStatus, type Role } from "@/lib/mock-db";
@@ -30,7 +38,10 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Суперадмин — HotShot Play" },
-      { name: "description", content: "Модерация клубов, пользователи и выручка платформы HotShot Play." },
+      {
+        name: "description",
+        content: "Модерация клубов, пользователи и выручка платформы HotShot Play.",
+      },
       { property: "og:title", content: "HotShot Play — панель суперадмина" },
       { property: "og:description", content: "Заявки клубов, пользователи и аналитика платформы." },
       { property: "og:type", content: "website" },
@@ -129,8 +140,11 @@ function AdminInner() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display flex items-center gap-2 text-2xl font-bold">
-          <ShieldCheck className="size-6 text-primary" /> {t("admin.title")}
+        <h1 className="font-display flex flex-wrap items-center gap-2 text-2xl font-extrabold">
+          <span className="grid size-9 place-items-center rounded-2xl bg-primary/15 text-primary">
+            <ShieldCheck className="size-5" />
+          </span>{" "}
+          {t("admin.title")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("admin.subtitle")}</p>
       </div>
@@ -175,7 +189,11 @@ function AdminInner() {
                   </defs>
                   <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" />
                   <XAxis dataKey="day" stroke="var(--color-muted-foreground)" fontSize={12} />
-                  <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
+                  <YAxis
+                    stroke="var(--color-muted-foreground)"
+                    fontSize={12}
+                    tickFormatter={(v: number) => `${Math.round(v / 1000)}k`}
+                  />
                   <Tooltip
                     contentStyle={{
                       background: "var(--color-popover)",
@@ -185,7 +203,13 @@ function AdminInner() {
                     }}
                     formatter={(value) => [kzt(Number(value)), t("admin.kpi.gmv")]}
                   />
-                  <Area type="monotone" dataKey="revenue" stroke="var(--color-accent)" fill="url(#adminRev)" strokeWidth={2} />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="var(--color-accent)"
+                    fill="url(#adminRev)"
+                    strokeWidth={2}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -197,7 +221,9 @@ function AdminInner() {
           <section>
             <h2 className="font-display text-lg font-bold">{t("admin.applications")}</h2>
             {pending.length === 0 ? (
-              <p className="neon-panel mt-3 p-6 text-center text-sm text-muted-foreground">{t("admin.noApps")}</p>
+              <p className="neon-panel mt-3 p-6 text-center text-sm text-muted-foreground">
+                {t("admin.noApps")}
+              </p>
             ) : (
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {pending.map((club) => (
@@ -211,8 +237,8 @@ function AdminInner() {
                             {club.address} · {t("admin.appliedAt")} {club.appliedAt}
                           </p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {t("admin.col.owner")}: {userName(club.ownerId)} · {club.totalSeats} {t("home.seats")} ·{" "}
-                            {kzt(club.pricePerHour)}
+                            {t("admin.col.owner")}: {userName(club.ownerId)} · {club.totalSeats}{" "}
+                            {t("home.seats")} · {kzt(club.pricePerHour)}
                             {t("home.perHour")}
                           </p>
                         </div>
@@ -228,7 +254,7 @@ function AdminInner() {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            className="neon-glow"
+
                             onClick={() => {
                               setClubStatus(club.id, "active");
                               toast.success(`${club.name} — ${t("admin.approved")}`);
@@ -240,7 +266,10 @@ function AdminInner() {
                             size="sm"
                             variant="destructive"
                             onClick={() => {
-                              rejectClub(club.id, (reasons[club.id] ?? "").trim() || t("admin.rejectReason"));
+                              rejectClub(
+                                club.id,
+                                (reasons[club.id] ?? "").trim() || t("admin.rejectReason"),
+                              );
                               toast.success(`${club.name} — ${t("admin.rejected")}`);
                             }}
                           >
@@ -281,7 +310,9 @@ function AdminInner() {
                     <td className="p-3">{club.totalSeats}</td>
                     <td className="p-3">{club.rating > 0 ? club.rating.toFixed(1) : "—"}</td>
                     <td className="p-3">
-                      <Badge variant={STATUS_VARIANT[club.status]}>{t(`status.${club.status}`)}</Badge>
+                      <Badge variant={STATUS_VARIANT[club.status]}>
+                        {t(`status.${club.status}`)}
+                      </Badge>
                     </td>
                     <td className="p-3">
                       {club.status === "active" && (
@@ -449,12 +480,22 @@ function SubscriptionsTab() {
                         onChange={(e) => setHours((h) => ({ ...h, [s.id]: e.target.value }))}
                         aria-label={t("adminSubs.hours")}
                       />
-                      <Button size="sm" variant="secondary" disabled={busy === s.id} onClick={() => saveHours(s)}>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={busy === s.id}
+                        onClick={() => saveHours(s)}
+                      >
                         {t("adminSubs.saveHours")}
                       </Button>
                     </>
                   )}
-                  <Button size="sm" variant="destructive" disabled={busy === s.id} onClick={() => revoke(s)}>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    disabled={busy === s.id}
+                    onClick={() => revoke(s)}
+                  >
                     {t("adminSubs.cancel")}
                   </Button>
                 </div>
@@ -538,9 +579,15 @@ function PaymentsTab() {
                   <span className="text-muted-foreground">{t("adminPay.receipt")}: </span>
                   <b>{p.receiptNumber || "—"}</b>
                 </p>
-                <p className="text-xs text-muted-foreground">{p.createdAt.slice(0, 16).replace("T", " ")}</p>
+                <p className="text-xs text-muted-foreground">
+                  {p.createdAt.slice(0, 16).replace("T", " ")}
+                </p>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <Button size="sm" disabled={busy === p.id} onClick={() => void act(p.id, "approve")}>
+                  <Button
+                    size="sm"
+                    disabled={busy === p.id}
+                    onClick={() => void act(p.id, "approve")}
+                  >
                     {t("adminPay.approve")}
                   </Button>
                   <Input
@@ -579,7 +626,9 @@ function PaymentsTab() {
             {history.map((p) => (
               <tr key={p.id} className="border-b border-border/50 last:border-0">
                 <td className="p-3">{p.playerName}</td>
-                <td className="p-3 text-muted-foreground">{p.planId ? t(`plan.${p.planId}.name`) : "—"}</td>
+                <td className="p-3 text-muted-foreground">
+                  {p.planId ? t(`plan.${p.planId}.name`) : "—"}
+                </td>
                 <td className="p-3 text-muted-foreground">{p.receiptNumber || "—"}</td>
                 <td className="p-3">{kzt(p.amountKzt)}</td>
                 <td className="p-3">

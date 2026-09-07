@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { authEn, authKk, authRu } from "./i18n-auth";
+import { uiEn, uiKk, uiRu } from "./i18n-ui";
 
 export const LANGS = [
   { code: "ru", label: "Рус" },
@@ -285,7 +286,8 @@ const en: Dict = {
   "kaspi.receipt": "Kaspi receipt number",
   "kaspi.receiptPh": "e.g. 123456789",
   "kaspi.receiptHint": "You can find it in the Kaspi payment details.",
-  "kaspi.moderationHint": "After moderation your hours are added automatically — usually within a few minutes.",
+  "kaspi.moderationHint":
+    "After moderation your hours are added automatically — usually within a few minutes.",
   "kaspi.submit": "I have transferred the funds",
   "kaspi.sending": "Sending…",
   "kaspi.submitted": "Receipt sent, waiting for confirmation",
@@ -293,7 +295,8 @@ const en: Dict = {
   "kaspi.alreadyPending": "You already have a payment awaiting confirmation",
   "kaspi.copied": "Copied",
   "kaspi.pendingTitle": "Payment is being verified",
-  "kaspi.pendingText": "We are checking your Kaspi transfer, hours will appear right after approval.",
+  "kaspi.pendingText":
+    "We are checking your Kaspi transfer, hours will appear right after approval.",
   "kaspi.rejectedTitle": "Payment rejected",
   "kaspi.rejectedText": "Check the receipt number and submit the payment again.",
 };
@@ -441,8 +444,7 @@ const ru: Dict = {
   "profile.date": "Дата",
 
   "staff.title": "Брони клуба",
-  "staff.subtitle":
-    "Входящие брони и отметки по коду. Финансы доступны только владельцу клуба.",
+  "staff.subtitle": "Входящие брони и отметки по коду. Финансы доступны только владельцу клуба.",
   "staff.today": "Сегодня",
   "staff.upcoming": "Будущие",
   "staff.verify": "Проверить код брони",
@@ -475,12 +477,14 @@ const ru: Dict = {
   "partner.tab.reviews": "Отзывы",
   "partner.tab.staff": "Сотрудники",
   "partner.kpi.month": "Выручка за месяц",
-  "partner.staffHint": "Добавьте сотрудника по e-mail его зарегистрированного аккаунта HotShot Play.",
+  "partner.staffHint":
+    "Добавьте сотрудника по e-mail его зарегистрированного аккаунта HotShot Play.",
   "partner.staffAdd": "Добавить",
   "partner.staffAdded": "Сотрудник добавлен",
   "partner.staffRemoved": "Сотрудник удалён",
   "partner.staffEmpty": "Сотрудников пока нет",
-  "partner.staffNotFound": "Пользователь с таким e-mail не найден — попросите его зарегистрироваться",
+  "partner.staffNotFound":
+    "Пользователь с таким e-mail не найден — попросите его зарегистрироваться",
   "partner.staffError": "Не удалось обновить список сотрудников",
   "partner.tab.settings": "Настройки клуба",
   "partner.noReviews": "Отзывов пока нет.",
@@ -572,7 +576,8 @@ const ru: Dict = {
   "kaspi.receipt": "Номер квитанции Kaspi",
   "kaspi.receiptPh": "например, 123456789",
   "kaspi.receiptHint": "Номер указан в деталях платежа в приложении Kaspi.",
-  "kaspi.moderationHint": "После проверки часы начислятся автоматически — обычно в течение нескольких минут.",
+  "kaspi.moderationHint":
+    "После проверки часы начислятся автоматически — обычно в течение нескольких минут.",
   "kaspi.submit": "Я перевёл деньги",
   "kaspi.sending": "Отправляем…",
   "kaspi.submitted": "Квитанция отправлена, ожидайте подтверждения",
@@ -821,9 +826,9 @@ const kk: Dict = {
 };
 
 const DICTS: Record<Lang, Dict> = {
-  en: { ...en, ...authEn },
-  ru: { ...ru, ...authRu },
-  kk: { ...kk, ...authKk },
+  en: { ...en, ...authEn, ...uiEn },
+  ru: { ...ru, ...authRu, ...uiRu },
+  kk: { ...kk, ...authKk, ...uiKk },
 };
 
 const LOCALES: Record<Lang, string> = { ru: "ru-RU", kk: "kk-KZ", en: "en-GB" };

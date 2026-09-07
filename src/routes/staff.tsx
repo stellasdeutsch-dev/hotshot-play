@@ -63,7 +63,7 @@ function StaffInner() {
     b.status === "upcoming" ? (
       <Button
         size="sm"
-        className="neon-glow"
+
         onClick={async () => {
           await checkInBooking(b.id);
           toast.success(`${b.code} · ${t("staff.checked")}`);
@@ -105,7 +105,9 @@ function StaffInner() {
               <tr key={b.id} className="border-b border-border/50 last:border-0">
                 <td className="p-3 font-medium">
                   {b.playerName || "—"}
-                  {b.playerPhone && <span className="block text-xs text-muted-foreground">{b.playerPhone}</span>}
+                  {b.playerPhone && (
+                    <span className="block text-xs text-muted-foreground">{b.playerPhone}</span>
+                  )}
                 </td>
                 <td className="p-3 font-mono">{b.startTime}</td>
                 <td className="p-3">
@@ -131,9 +133,12 @@ function StaffInner() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display flex items-center gap-2 text-2xl font-bold">
-          <ClipboardCheck className="size-6 text-primary" /> {t("staff.title")}
-          {club && <span className="neon-text">· {club.name}</span>}
+        <h1 className="font-display flex flex-wrap items-center gap-2 text-2xl font-extrabold">
+          <span className="grid size-9 place-items-center rounded-2xl bg-primary/15 text-primary">
+            <ClipboardCheck className="size-5" />
+          </span>{" "}
+          {t("staff.title")}
+          {club && <span className="text-primary">· {club.name}</span>}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("staff.subtitle")}</p>
       </div>

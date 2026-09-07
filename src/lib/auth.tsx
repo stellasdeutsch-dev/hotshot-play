@@ -61,6 +61,10 @@ interface AuthValue {
     club: ClubDraft;
   }) => Promise<AuthResult>;
   resendConfirmation: (email: string) => Promise<AuthResult>;
+  /** Sends a password-recovery email; the link returns the user to /auth?reset=1. */
+  resetPassword: (email: string) => Promise<AuthResult>;
+  /** Sets a new password for the current (recovery) session. */
+  updatePassword: (password: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -75,7 +79,8 @@ const initials = (name: string) =>
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("") || "HS";
 
-const redirectUrl = () => (typeof window === "undefined" ? "" : `${window.location.origin}/auth?confirmed=1`);
+const redirectUrl = () =>
+  typeof window === "undefined" ? "" : `${window.location.origin}/auth?confirmed=1`;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -205,6 +210,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: email.trim(),
           options: { emailRedirectTo: redirectUrl() },
         });
+        if (error) return { ok: false, error: error.message };
+        return { ok: true };
+      },
+      resetPassword: async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: typeof window === "undefined" ? "" : `${window.location.origin}/auth?reset=1`,
+        });
+        if (error) return { ok: false, error: error.message };
+        return { ok: true };
+      },
+      updatePassword: async (password) => {
+        const { error } = await supabase.auth.updateUser({ password });
         if (error) return { ok: false, error: error.message };
         return { ok: true };
       },

@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Club, ClubStatus } from "./mock-db";
+import { DEMO_CLUBS } from "./demo-clubs";
 
 type ClubUpdate = Database["public"]["Tables"]["clubs"]["Update"];
 
@@ -50,13 +51,21 @@ export const rowToClub = (r: Row): Club => ({
   ...(r.rejection_reason ? { rejectionReason: r.rejection_reason } : {}),
 });
 
+const demoEnabled = () => import.meta.env.DEV || import.meta.env["VITE_DEMO_CLUBS"] === "1";
+
 export async function fetchClubs(): Promise<Club[]> {
-  const { data, error } = await supabase.from("clubs").select("*").order("created_at", { ascending: true });
+  const { data, error } = await supabase
+    .from("clubs")
+    .select("*")
+    .order("created_at", { ascending: true });
   if (error) {
     console.error("fetchClubs", error);
-    return [];
+    return demoEnabled() ? DEMO_CLUBS : [];
   }
-  return ((data ?? []) as unknown as Row[]).map(rowToClub);
+  const clubs = ((data ?? []) as unknown as Row[]).map(rowToClub);
+  // An empty database renders demo clubs so the UI can be reviewed (dev, or VITE_DEMO_CLUBS=1 showcase builds).
+  if (clubs.length === 0 && demoEnabled()) return DEMO_CLUBS;
+  return clubs;
 }
 
 export const clubPatchToRow = (patch: Partial<Club>): ClubUpdate => {

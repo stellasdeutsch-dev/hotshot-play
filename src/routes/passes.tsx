@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Check, Flame, Infinity as InfinityIcon, Zap } from "lucide-react";
+import { Check, Flame, Infinity as InfinityIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
@@ -17,7 +17,8 @@ export const Route = createFileRoute("/passes")({
       { title: "Абонементы — HotShot Play" },
       {
         name: "description",
-        content: "Игровые абонементы HotShot Play: 3 часа, 5 часов, 30 часов и Безлимит во всех клубах Астаны.",
+        content:
+          "Игровые абонементы HotShot Play: 11, 19, 27 часов и Безлимит во всех клубах Астаны.",
       },
       { property: "og:title", content: "HotShot Play — абонементы для игроков" },
       { property: "og:description", content: "Один абонемент — все клубы-партнёры." },
@@ -36,6 +37,7 @@ function PassesPage() {
 
   const sub = user && role === "player" ? activeSubFor(user.id) : undefined;
   const lastPayment = user ? latestPaymentFor(user.id) : undefined;
+  const pending = lastPayment?.status === "pending";
 
   const startBuy = (plan: SubscriptionPlan) => {
     if (!user || role !== "player") {
@@ -47,115 +49,137 @@ function PassesPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <section className="max-w-2xl">
-        <span className="inline-flex items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
-          <Zap className="size-3.5" /> {t("passes.badge")}
-        </span>
-        <h1 className="font-display mt-4 text-3xl font-bold leading-tight sm:text-5xl">
-          {t("passes.title1")} <span className="neon-text">{t("passes.title2")}</span>
-        </h1>
-        <p className="mt-3 text-sm text-muted-foreground sm:text-base">{t("passes.subtitle")}</p>
+    <div className="space-y-6">
+      <section className="flex flex-wrap items-end justify-between gap-4">
+        <div className="max-w-xl">
+          <span className="ca-pill ca-pill-dark">
+            <span className="size-1.5 rounded-full bg-lime" /> {t("passes.badge")}
+          </span>
+          <h1 className="font-display mt-3 text-3xl font-extrabold leading-[1.05] sm:text-4xl">
+            {t("passes.title1")} <span className="text-primary">{t("passes.title2")}</span>
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground sm:text-base">{t("passes.subtitle")}</p>
+        </div>
       </section>
 
-      {/* Current subscription */}
+      {/* Current balance */}
       {role === "player" && (
-        <section className="neon-panel p-5 sm:p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {t("passes.current")}
-          </p>
+        <section className="ca-card p-4 sm:p-5">
+          <p className="text-xs font-semibold text-muted-foreground">{t("passes.current")}</p>
           {sub ? (
-            <div className="mt-3 flex flex-wrap items-center gap-6">
+            <div className="mt-2 flex flex-wrap items-center gap-6">
               <div>
-                <p className="font-display text-2xl font-bold text-primary">{t(`plan.${sub.planId}.name`)}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t("passes.validUntil")} {sub.validUntil}
+                <p className="font-display text-3xl font-extrabold tabular">
+                  {sub.hoursLeft === null ? "∞" : sub.hoursLeft}
+                  <span className="ml-1.5 text-base font-bold text-muted-foreground">
+                    {sub.hoursTotal !== null
+                      ? `/ ${sub.hoursTotal} ${t("passes.hours")}`
+                      : t("passes.unlimited")}
+                  </span>
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t(`plan.${sub.planId}.name`)} · {t("passes.validUntil")} {sub.validUntil}
                 </p>
               </div>
               {sub.hoursLeft !== null && sub.hoursTotal !== null ? (
                 <div className="min-w-52 flex-1">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>
-                      {sub.hoursLeft} {t("passes.left")} {sub.hoursTotal} {t("passes.hours")}
-                    </span>
-                  </div>
-                  <Progress value={(sub.hoursLeft / sub.hoursTotal) * 100} className="mt-1.5" />
+                  <Progress value={(sub.hoursLeft / sub.hoursTotal) * 100} />
                 </div>
               ) : (
-                <span className="flex items-center gap-1.5 text-accent">
+                <span className="flex items-center gap-1.5 font-bold text-lime">
                   <InfinityIcon className="size-5" /> {t("passes.unlimited")}
                 </span>
               )}
             </div>
           ) : (
-            <p className="mt-2 text-sm text-muted-foreground">{t("passes.none")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("passes.none")}</p>
           )}
         </section>
       )}
 
-      {role === "player" && lastPayment?.status === "pending" && (
-        <section className="neon-panel border-accent/50 p-5 text-sm">
-          <p className="font-semibold text-accent">{t("kaspi.pendingTitle")}</p>
+      {role === "player" && pending && (
+        <section className="rounded-3xl border border-primary/40 bg-primary/10 p-4 text-sm sm:p-5">
+          <p className="font-bold text-primary">{t("kaspi.pendingTitle")}</p>
           <p className="mt-1 text-muted-foreground">
-            {t("kaspi.pendingText")} · {t("kaspi.receipt")}: <b className="text-foreground">{lastPayment.receiptNumber}</b>
+            {t("kaspi.pendingText")} · {t("kaspi.receipt")}:{" "}
+            <b className="text-foreground">{lastPayment?.receiptNumber}</b>
           </p>
         </section>
       )}
 
       {role === "player" && lastPayment?.status === "rejected" && (
-        <section className="neon-panel border-destructive/50 p-5 text-sm">
-          <p className="font-semibold text-destructive">{t("kaspi.rejectedTitle")}</p>
-          <p className="mt-1 text-muted-foreground">{lastPayment.rejectionReason || t("kaspi.rejectedText")}</p>
+        <section className="rounded-3xl border border-destructive/40 bg-destructive/10 p-4 text-sm sm:p-5">
+          <p className="font-bold text-destructive">{t("kaspi.rejectedTitle")}</p>
+          <p className="mt-1 text-muted-foreground">
+            {lastPayment.rejectionReason || t("kaspi.rejectedText")}
+          </p>
         </section>
       )}
 
       {/* Plans */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {SUBSCRIPTION_PLANS.map((plan) => (
-          <div
-            key={plan.id}
-            className={cn(
-              "neon-panel flex flex-col p-5 transition-transform hover:-translate-y-1",
-              plan.highlight && "neon-glow border-primary/60",
-            )}
-          >
-            {plan.highlight && (
-              <span className="mb-3 inline-flex w-fit items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1 text-[11px] font-bold text-primary">
-                <Flame className="size-3" /> HOT
-              </span>
-            )}
-            <h2 className="font-display text-xl font-bold">{t(`plan.${plan.id}.name`)}</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">{t(`plan.${plan.id}.tag`)}</p>
-            <p className="font-display mt-4 text-3xl font-extrabold text-accent">
-              {kzt(plan.priceKzt)}
-              <span className="text-xs font-medium text-muted-foreground"> {t("passes.month")}</span>
-            </p>
-            <ul className="mt-4 flex-1 space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <Check className="size-4 text-accent" />
-                {plan.hours === null ? t("passes.unlimited") : `${plan.hours} ${t("passes.hours")}`}
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-4 text-accent" /> {t("passes.perk.clubs")}
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-4 text-accent" /> {t("passes.perk.valid")}
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-4 text-accent" /> {t("passes.perk.cap", { cap: plan.dailyCap })}
-              </li>
-            </ul>
-            <Button
-              className={cn("mt-5 w-full", plan.highlight && "neon-glow")}
-              variant={plan.highlight ? "default" : "secondary"}
-              disabled={lastPayment?.status === "pending"}
-              onClick={() => startBuy(plan)}
-            >
-              {lastPayment?.status === "pending" ? t("kaspi.pendingTitle") : t("passes.buy")}
-            </Button>
-
-          </div>
-        ))}
+      <section>
+        <h2 className="font-display mb-3 text-xl font-extrabold">{t("passes.choosePlan")}</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {SUBSCRIPTION_PLANS.map((plan, i) => {
+            const perHour = plan.hours ? Math.round(plan.priceKzt / plan.hours) : null;
+            return (
+              <div
+                key={plan.id}
+                className={cn(
+                  "ca-card ca-rise relative flex flex-col p-5 transition-transform hover:-translate-y-0.5",
+                  plan.highlight && "ring-2 ring-primary",
+                )}
+                style={{ animationDelay: `${i * 50}ms` }}
+              >
+                {plan.highlight && (
+                  <span className="ca-pill ca-pill-lime absolute right-4 top-4">
+                    <Flame className="size-3" /> {t("passes.hot")}
+                  </span>
+                )}
+                <p className="text-xs font-semibold text-muted-foreground">
+                  {t(`plan.${plan.id}.tag`)}
+                </p>
+                <h3 className="font-display mt-1 text-2xl font-extrabold">
+                  {t(`plan.${plan.id}.name`)}
+                </h3>
+                <p className="font-display mt-4 text-3xl font-extrabold tabular">
+                  {kzt(plan.priceKzt)}
+                  <span className="ml-1 text-xs font-semibold text-muted-foreground">
+                    {t("passes.month")}
+                  </span>
+                </p>
+                {perHour !== null ? (
+                  <span className="ca-pill ca-pill-dark mt-2 w-fit">
+                    ≈ {kzt(perHour)} {t("passes.perHour")}
+                  </span>
+                ) : (
+                  <span className="ca-pill ca-pill-dark mt-2 w-fit text-lime">
+                    <InfinityIcon className="size-3.5" /> {t("passes.unlimited")}
+                  </span>
+                )}
+                <ul className="mt-5 flex-1 space-y-2 text-sm text-muted-foreground">
+                  <Perk>
+                    {plan.hours === null
+                      ? t("passes.unlimited")
+                      : `${plan.hours} ${t("passes.hours")}`}
+                  </Perk>
+                  <Perk>{t("passes.perk.clubs")}</Perk>
+                  <Perk>{t("passes.perk.valid")}</Perk>
+                  <Perk>{t("passes.perk.cap", { cap: plan.dailyCap })}</Perk>
+                </ul>
+                <Button
+                  className="mt-5 w-full"
+                  size="lg"
+                  variant={plan.highlight ? "default" : "secondary"}
+                  disabled={pending}
+                  onClick={() => startBuy(plan)}
+                >
+                  {pending ? t("kaspi.pendingTitle") : t("passes.pay")}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
       </section>
 
       {payPlan && (
@@ -170,12 +194,24 @@ function PassesPage() {
               setPayPlan(null);
               toast.success(t("kaspi.submitted"));
             } else {
-              toast.error(res.error === "alreadyPending" ? t("kaspi.alreadyPending") : t("kaspi.failed"));
+              toast.error(
+                res.error === "alreadyPending" ? t("kaspi.alreadyPending") : t("kaspi.failed"),
+              );
             }
           }}
         />
       )}
-
     </div>
+  );
+}
+
+function Perk({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-lime/15 text-lime">
+        <Check className="size-3" />
+      </span>
+      {children}
+    </li>
   );
 }

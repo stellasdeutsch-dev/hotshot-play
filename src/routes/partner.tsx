@@ -1,17 +1,42 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { CalendarClock, Clock, Gift, LayoutDashboard, Settings, Star, Trash2, UserPlus, Users, Wallet } from "lucide-react";
+import {
+  CalendarClock,
+  Clock,
+  Gift,
+  LayoutDashboard,
+  Settings,
+  Star,
+  Trash2,
+  UserPlus,
+  Users,
+  Wallet,
+} from "lucide-react";
 import { toast } from "sonner";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useStore } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
 import { kzt, last7Days } from "@/lib/mock-db";
-import { addClubStaff, listClubStaff, removeClubStaff, type StaffMember } from "@/lib/staff.functions";
+import {
+  addClubStaff,
+  listClubStaff,
+  removeClubStaff,
+  type StaffMember,
+} from "@/lib/staff.functions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RequireRole } from "@/components/RequireRole";
@@ -20,7 +45,10 @@ export const Route = createFileRoute("/partner")({
   head: () => ({
     meta: [
       { title: "Кабинет владельца — HotShot Play" },
-      { name: "description", content: "Финансы, отзывы и настройки клуба для владельца на HotShot Play." },
+      {
+        name: "description",
+        content: "Финансы, отзывы и настройки клуба для владельца на HotShot Play.",
+      },
       { property: "og:title", content: "HotShot Play — кабинет владельца клуба" },
       { property: "og:description", content: "Выручка, брони, отзывы и настройки клуба." },
       { property: "og:type", content: "website" },
@@ -51,6 +79,9 @@ function PartnerInner() {
     totalSeats: club?.totalSeats ?? 0,
     openFrom: club?.openFrom ?? "10:00",
     openTo: club?.openTo ?? "02:00",
+    cover: club?.cover ?? "",
+    specs: club?.specs ?? "",
+    description: club?.description ?? "",
   }));
 
   useEffect(() => {
@@ -63,6 +94,9 @@ function PartnerInner() {
       totalSeats: club.totalSeats,
       openFrom: club.openFrom,
       openTo: club.openTo,
+      cover: club.cover,
+      specs: club.specs,
+      description: club.description,
     });
   }, [club?.id]);
 
@@ -94,18 +128,22 @@ function PartnerInner() {
     .filter((b) => b.date.startsWith(month))
     .reduce((sum, b) => sum + b.hours * club.pricePerHour, 0);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({
-      ...f,
-      [k]: k === "pricePerHour" || k === "totalSeats" ? Number(e.target.value) : e.target.value,
-    }));
+  const set =
+    (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({
+        ...f,
+        [k]: k === "pricePerHour" || k === "totalSeats" ? Number(e.target.value) : e.target.value,
+      }));
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-display flex items-center gap-2 text-2xl font-bold">
-          <LayoutDashboard className="size-6 text-primary" /> {t("partner.title")}
-          <span className="neon-text">· {club.name}</span>
+        <h1 className="font-display flex flex-wrap items-center gap-2 text-2xl font-extrabold">
+          <span className="grid size-9 place-items-center rounded-2xl bg-primary/15 text-primary">
+            <LayoutDashboard className="size-5" />
+          </span>
+          {t("partner.title")}
+          <span className="text-primary">· {club.name}</span>
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("partner.subtitle")}</p>
       </div>
@@ -164,7 +202,11 @@ function PartnerInner() {
               { icon: CalendarClock, label: t("partner.kpi.bookings"), value: String(bookings7d) },
               { icon: Wallet, label: t("partner.kpi.month"), value: kzt(revenueMonth) },
               { icon: Star, label: t("partner.kpi.rating"), value: club.rating.toFixed(1) },
-              { icon: LayoutDashboard, label: t("partner.kpi.seats"), value: String(club.totalSeats) },
+              {
+                icon: LayoutDashboard,
+                label: t("partner.kpi.seats"),
+                value: String(club.totalSeats),
+              },
             ].map((kpi) => (
               <div key={kpi.label} className="neon-panel p-4">
                 <kpi.icon className="size-5 text-primary" />
@@ -187,7 +229,11 @@ function PartnerInner() {
                   </defs>
                   <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" />
                   <XAxis dataKey="day" stroke="var(--color-muted-foreground)" fontSize={12} />
-                  <YAxis stroke="var(--color-muted-foreground)" fontSize={12} tickFormatter={(v: number) => `${Math.round(v / 1000)}k`} />
+                  <YAxis
+                    stroke="var(--color-muted-foreground)"
+                    fontSize={12}
+                    tickFormatter={(v: number) => `${Math.round(v / 1000)}k`}
+                  />
                   <Tooltip
                     contentStyle={{
                       background: "var(--color-popover)",
@@ -197,7 +243,13 @@ function PartnerInner() {
                     }}
                     formatter={(value) => [kzt(Number(value)), t("partner.kpi.revenue")]}
                   />
-                  <Area type="monotone" dataKey="revenue" stroke="var(--color-primary)" fill="url(#rev)" strokeWidth={2} />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="var(--color-primary)"
+                    fill="url(#rev)"
+                    strokeWidth={2}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -210,7 +262,9 @@ function PartnerInner() {
 
         <TabsContent value="reviews" className="mt-4 space-y-3">
           {clubReviews.length === 0 && (
-            <p className="neon-panel p-8 text-center text-sm text-muted-foreground">{t("partner.noReviews")}</p>
+            <p className="neon-panel p-8 text-center text-sm text-muted-foreground">
+              {t("partner.noReviews")}
+            </p>
           )}
           {clubReviews.map((r) => (
             <div key={r.id} className="neon-panel flex items-start gap-3 p-4">
@@ -224,7 +278,10 @@ function PartnerInner() {
                     {[1, 2, 3, 4, 5].map((i) => (
                       <Star
                         key={i}
-                        className={cn("size-3.5", i <= r.rating ? "fill-accent text-accent" : "text-muted-foreground/40")}
+                        className={cn(
+                          "size-3.5",
+                          i <= r.rating ? "fill-accent text-accent" : "text-muted-foreground/40",
+                        )}
                       />
                     ))}
                   </span>
@@ -257,7 +314,13 @@ function PartnerInner() {
               </div>
               <div className="space-y-1.5">
                 <Label>{t("partner.price")}</Label>
-                <Input type="number" min={0} step={50} value={form.pricePerHour} onChange={set("pricePerHour")} />
+                <Input
+                  type="number"
+                  min={0}
+                  step={50}
+                  value={form.pricePerHour}
+                  onChange={set("pricePerHour")}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label>{t("partner.seats")}</Label>
@@ -271,16 +334,45 @@ function PartnerInner() {
                 <Label>{t("partner.closes")}</Label>
                 <Input value={form.openTo} onChange={set("openTo")} placeholder="02:00" />
               </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>{t("partner.cover")}</Label>
+                <Input
+                  value={form.cover}
+                  onChange={set("cover")}
+                  placeholder="https://…/photo.jpg"
+                />
+                <p className="text-[11px] text-muted-foreground">{t("partner.coverHint")}</p>
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>{t("partner.specs")}</Label>
+                <Input
+                  value={form.specs}
+                  onChange={set("specs")}
+                  placeholder="RTX 4070 · i7 · 32 GB · 240 Hz"
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>{t("partner.desc")}</Label>
+                <Textarea value={form.description} onChange={set("description")} rows={4} />
+              </div>
             </div>
-            <Button
-              className="neon-glow"
-              onClick={() => {
-                updateClub(club.id, form);
-                toast.success(t("partner.saved"));
-              }}
-            >
-              {t("partner.save")}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => {
+                  updateClub(club.id, form);
+                  toast.success(t("partner.saved"));
+                }}
+              >
+                {t("partner.save")}
+              </Button>
+              {club.status === "active" && (
+                <Button asChild variant="secondary">
+                  <Link to="/clubs/$clubId" params={{ clubId: club.id }}>
+                    {t("partner.preview")}
+                  </Link>
+                </Button>
+              )}
+            </div>
           </div>
         </TabsContent>
       </Tabs>
@@ -320,13 +412,14 @@ function StaffManager({ clubId }: { clubId: string }) {
         />
         <Button
           disabled={busy || !email.trim()}
-          className="neon-glow"
           onClick={async () => {
             setBusy(true);
             try {
               const res = await addClubStaff({ data: { clubId, email } });
               if (!res.ok) {
-                toast.error(res.error === "notFound" ? t("partner.staffNotFound") : t("partner.staffError"));
+                toast.error(
+                  res.error === "notFound" ? t("partner.staffNotFound") : t("partner.staffError"),
+                );
               } else {
                 setEmail("");
                 toast.success(t("partner.staffAdded"));
@@ -347,7 +440,10 @@ function StaffManager({ clubId }: { clubId: string }) {
       ) : (
         <ul className="space-y-2">
           {staff.map((m) => (
-            <li key={m.id} className="flex items-center gap-3 rounded-xl border border-border bg-card/60 p-3">
+            <li
+              key={m.id}
+              className="flex items-center gap-3 rounded-xl border border-border bg-card/60 p-3"
+            >
               <span className="grid size-9 place-items-center rounded-lg bg-primary/20 text-xs font-bold">
                 {m.name.slice(0, 2).toUpperCase()}
               </span>
