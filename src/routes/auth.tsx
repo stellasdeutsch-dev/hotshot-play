@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogoMark } from "@/components/Logo";
+import { DemoEntry } from "@/components/DemoEntry";
 
 type Mode = "signin" | "signup" | "reset" | "newPassword";
 type Kind = "player" | "club";
@@ -280,7 +281,8 @@ function AuthPage() {
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto max-w-md space-y-4">
+      <DemoEntry className="ca-rise" />
       <div className="ca-card ca-rise p-6 sm:p-8">{children}</div>
     </div>
   );

@@ -474,7 +474,7 @@ function CartSheet({
   const [seat, setSeat] = useState("");
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<Order | null>(null);
+  const [done, setDone] = useState<{ order: Order; clubName: string } | null>(null);
 
   const club = clubs.find((c) => c.id === cart.clubId);
   const current = user
@@ -507,7 +507,7 @@ function CartSheet({
       toast.error(t("kaspi.failed"));
       return;
     }
-    setDone(res.order);
+    setDone({ order: res.order, clubName: club?.name ?? "" });
     cart.clear();
     setComment("");
     onOrdered();
@@ -535,11 +535,11 @@ function CartSheet({
                 {t("shop.orderCode")}
               </p>
               <p className="font-display mt-1 text-4xl font-extrabold tracking-[0.18em] text-primary">
-                {done.code}
+                {done.order.code}
               </p>
               <p className="mt-2 text-xs font-semibold text-muted-foreground">
-                {club?.name} · {kzt(done.totalKzt)}
-                {done.seat ? ` · ${t("seats.pc")} ${done.seat}` : ""}
+                {done.clubName} · {kzt(done.order.totalKzt)}
+                {done.order.seat ? ` · ${t("seats.pc")} ${done.order.seat}` : ""}
               </p>
             </div>
             <Button className="mt-5 w-full" size="lg" onClick={() => close(false)}>

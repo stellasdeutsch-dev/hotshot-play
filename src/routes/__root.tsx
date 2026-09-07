@@ -119,7 +119,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="ru">
+    // The theme script sets class/color-scheme before hydration.
+    <html lang="ru" suppressHydrationWarning>
       <head>
         <HeadContent />
         {/* Applies the stored palette before first paint to avoid a flash. */}

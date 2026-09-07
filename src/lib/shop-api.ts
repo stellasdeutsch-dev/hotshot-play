@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database, Json } from "@/integrations/supabase/types";
 import { DEMO_PRODUCTS, isDemoClub, localId, readLocal, writeLocal } from "./demo-data";
+import { isDemoUserId } from "./demo-user";
 import {
   makeOrderCode,
   type Order,
@@ -43,6 +44,7 @@ const toOrder = (r: OrderRow): Order => ({
 });
 
 const LOCAL_ORDERS = "hsp-demo-orders";
+const isLocalId = (id: string) => id.startsWith("local-");
 const localOrders = () => readLocal<Order[]>(LOCAL_ORDERS, []);
 
 /** Active catalogue of a club (owners/staff also receive inactive rows via RLS). */
@@ -107,7 +109,7 @@ export async function createOrder(
   const total = input.items.reduce((s, i) => s + i.priceKzt * i.qty, 0);
   if (input.items.length === 0) return { ok: false, error: "empty" };
 
-  if (isDemoClub(input.clubId)) {
+  if (isDemoClub(input.clubId) || isDemoUserId(input.userId)) {
     const order: Order = {
       id: localId(),
       code: makeOrderCode(),
@@ -151,6 +153,7 @@ export async function createOrder(
 
 export async function fetchMyOrders(userId: string): Promise<Order[]> {
   const local = localOrders().filter((o) => o.userId === userId);
+  if (isDemoUserId(userId)) return local;
   const { data, error } = await supabase
     .from("orders")
     .select("*")
@@ -180,7 +183,7 @@ export async function fetchClubOrders(clubId: string): Promise<Order[]> {
 }
 
 export async function updateOrderStatus(order: Order, status: OrderStatus): Promise<boolean> {
-  if (isDemoClub(order.clubId)) {
+  if (isDemoClub(order.clubId) || isLocalId(order.id)) {
     writeLocal(
       LOCAL_ORDERS,
       localOrders().map((o) => (o.id === order.id ? { ...o, status } : o)),

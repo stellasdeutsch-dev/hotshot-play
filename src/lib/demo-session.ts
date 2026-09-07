@@ -4,6 +4,7 @@ import {
   todayStr,
   type Booking,
   type Payment,
+  type Review,
   type UserSubscription,
 } from "./mock-db";
 
@@ -19,12 +20,28 @@ import {
 const BOOKINGS_KEY = "hsp-demo-bookings";
 const SUBS_KEY = "hsp-demo-subs";
 const PAYMENTS_KEY = "hsp-demo-payments";
+const REVIEWS_KEY = "hsp-demo-reviews";
 
 export const isLocalId = (id: string) => id.startsWith("local-");
 
 export const readDemoBookings = () => readLocal<Booking[]>(BOOKINGS_KEY, []);
 export const readDemoSubs = () => readLocal<UserSubscription[]>(SUBS_KEY, []);
 export const readDemoPayments = () => readLocal<Payment[]>(PAYMENTS_KEY, []);
+export const readDemoReviews = () => readLocal<Review[]>(REVIEWS_KEY, []);
+
+/** Stores a review left in demo mode; one review per club and author. */
+export function addDemoReview(input: Omit<Review, "id" | "createdAt">): Review {
+  const review: Review = {
+    ...input,
+    id: localId(),
+    createdAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+  };
+  const rest = readDemoReviews().filter(
+    (r) => !(r.clubId === input.clubId && r.userId === input.userId),
+  );
+  writeLocal(REVIEWS_KEY, [review, ...rest]);
+  return review;
+}
 
 const writeBookings = (rows: Booking[]) => writeLocal(BOOKINGS_KEY, rows);
 const writeSubs = (rows: UserSubscription[]) => writeLocal(SUBS_KEY, rows);

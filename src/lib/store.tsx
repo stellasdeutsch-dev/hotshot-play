@@ -12,13 +12,16 @@ import { clubPatchToRow, fetchClubs } from "./clubs-api";
 import { supabase } from "@/integrations/supabase/client";
 import { submitKaspiPayment } from "./payments.functions";
 import { demoEnabled } from "./demo-data";
+import { isDemoUserId } from "./demo-user";
 import {
   addDemoBooking,
+  addDemoReview,
   grantDemoSubscription,
   isLocalId,
   patchDemoBooking,
   readDemoBookings,
   readDemoPayments,
+  readDemoReviews,
   readDemoSubs,
   spendDemoHours,
   isDemoFlow,
@@ -201,12 +204,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       .from("reviews")
       .select("*")
       .order("created_at", { ascending: false });
-    setReviews(((reviewRows ?? []) as unknown as ReviewRow[]).map(toReview));
+    setReviews([
+      ...(demoEnabled() ? readDemoReviews() : []),
+      ...((reviewRows ?? []) as unknown as ReviewRow[]).map(toReview),
+    ]);
+
+    const localBookings = demoEnabled() ? readDemoBookings() : [];
+    const localSubs = demoEnabled() ? readDemoSubs() : [];
+    const localPayments = demoEnabled() ? readDemoPayments() : [];
 
     if (!authed) {
-      setBookings([]);
-      setSubscriptions([]);
-      setPayments([]);
+      // Demo identities have no Supabase session — their rows live locally.
+      setBookings(localBookings);
+      setSubscriptions(localSubs);
+      setPayments(localPayments);
       setLoading(false);
       return;
     }
@@ -216,9 +227,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       supabase.from("player_subscriptions").select("*").order("created_at", { ascending: false }),
       supabase.from("payments").select("*").order("created_at", { ascending: false }),
     ]);
-    const localBookings = demoEnabled() ? readDemoBookings() : [];
-    const localSubs = demoEnabled() ? readDemoSubs() : [];
-    const localPayments = demoEnabled() ? readDemoPayments() : [];
     setBookings([
       ...localBookings,
       ...((bookingRows ?? []) as unknown as BookingRow[]).map(toBooking),
@@ -263,6 +271,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       usedHoursOn,
       submitKaspiReceipt: async (planId: string, receiptNumber: string) => {
         if (!authUser) return { ok: false, error: "auth" };
+        if (isDemoUserId(authUser.id)) {
+          grantDemoSubscription(authUser.id, planId);
+          await loadData();
+          return { ok: true, demo: true };
+        }
         try {
           const res = await submitKaspiPayment({ data: { planId, receiptNumber } });
           if (res.ok) await loadData();
@@ -290,7 +303,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return { ok: false as const, error: "dailyCap" as const };
         }
 
-        if (isDemoFlow(input.clubId)) {
+        if (isDemoFlow(input.clubId) || isDemoUserId(authUser.id)) {
           const booking: Booking = {
             id: `local-${Date.now().toString(36)}`,
             code: makeBookingCode(),
@@ -436,6 +449,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       addReview: async (clubId, rating, text) => {
         if (!authUser) return;
+        if (isDemoFlow(clubId) || isDemoUserId(authUser.id)) {
+          const review = addDemoReview({
+            clubId,
+            userId: authUser.id,
+            authorName: authUser.name,
+            rating,
+            text,
+          });
+          setReviews((prev) => [review, ...prev.filter((r) => r.id !== review.id)]);
+          return;
+        }
         const { data, error } = await supabase
           .from("reviews")
           .upsert(

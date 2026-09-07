@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ClubCard } from "@/components/ClubCard";
 import { ClubCover } from "@/components/ClubCover";
+import { DemoEntry } from "@/components/DemoEntry";
 
 const ClubMap = lazy(() => import("@/components/ClubMap"));
 
@@ -144,7 +145,10 @@ function HomePage() {
           locale={locale}
         />
       ) : (
-        <GuestHero clubs={active.length} seats={totalSeats} />
+        <>
+          <GuestHero clubs={active.length} seats={totalSeats} />
+          <DemoEntry />
+        </>
       )}
 
       {/* Current session / call to action */}

@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { DEMO_CHAT_REPLIES, isDemoClub, localId, readLocal, writeLocal } from "./demo-data";
+import { isDemoUserId } from "./demo-user";
 import type { ChatMessage, ChatSender } from "./mock-db";
 
 type Row = Database["public"]["Tables"]["chat_messages"]["Row"];
@@ -27,6 +28,10 @@ export interface ChatThread {
 
 /* ------------------------------ demo (localStorage) ------------------------------ */
 
+/** Local storage is used for demo clubs and for local demo identities. */
+const isLocalThread = (clubId: string, userId: string) =>
+  isDemoClub(clubId) || isDemoUserId(userId);
+
 const demoKey = (clubId: string, userId: string) => `hsp-demo-chat:${clubId}:${userId}`;
 const demoBus = typeof window !== "undefined" ? new EventTarget() : null;
 
@@ -39,7 +44,7 @@ function demoAppend(clubId: string, userId: string, msg: ChatMessage) {
 /* ------------------------------ public API ------------------------------ */
 
 export async function fetchThread(clubId: string, userId: string): Promise<ChatMessage[]> {
-  if (isDemoClub(clubId)) return readLocal<ChatMessage[]>(demoKey(clubId, userId), []);
+  if (isLocalThread(clubId, userId)) return readLocal<ChatMessage[]>(demoKey(clubId, userId), []);
   const { data, error } = await supabase
     .from("chat_messages")
     .select("*")
@@ -63,7 +68,7 @@ export async function sendMessage(input: {
   const text = input.text.trim();
   if (!text) return null;
 
-  if (isDemoClub(input.clubId)) {
+  if (isLocalThread(input.clubId, input.userId)) {
     const msg: ChatMessage = {
       id: localId(),
       clubId: input.clubId,
@@ -119,7 +124,7 @@ export function subscribeThread(
   userId: string,
   onMessage: (m: ChatMessage) => void,
 ) {
-  if (isDemoClub(clubId)) {
+  if (isLocalThread(clubId, userId)) {
     const handler = (e: Event) => {
       const m = (e as CustomEvent<ChatMessage>).detail;
       if (m.clubId === clubId && m.userId === userId) onMessage(m);
@@ -144,9 +149,12 @@ export function subscribeThread(
 }
 
 /** Threads of a club for staff: one row per player, newest first. */
-export async function fetchClubThreads(clubId: string): Promise<ChatThread[]> {
+export async function fetchClubThreads(
+  clubId: string,
+  staffUserId?: string,
+): Promise<ChatThread[]> {
   let rows: ChatMessage[] = [];
-  if (isDemoClub(clubId)) {
+  if (isDemoClub(clubId) || isDemoUserId(staffUserId ?? "")) {
     if (typeof window !== "undefined") {
       const prefix = `hsp-demo-chat:${clubId}:`;
       for (let i = 0; i < window.localStorage.length; i++) {
@@ -190,7 +198,7 @@ export async function fetchClubThreads(clubId: string): Promise<ChatThread[]> {
 /** Marks messages from the other side as read. */
 export async function markThreadRead(clubId: string, userId: string, me: ChatSender) {
   const other: ChatSender = me === "player" ? "club" : "player";
-  if (isDemoClub(clubId)) {
+  if (isLocalThread(clubId, userId)) {
     const key = demoKey(clubId, userId);
     const now = new Date().toISOString();
     writeLocal(
@@ -218,6 +226,8 @@ export async function fetchUnreadForPlayer(userId: string, demoClubIds: string[]
       (m) => m.sender === "club" && !m.readAt,
     ).length;
   }
+  // Demo identities have no Supabase session — everything they wrote is local.
+  if (isDemoUserId(userId)) return count;
   const { count: dbCount } = await supabase
     .from("chat_messages")
     .select("id", { count: "exact", head: true })

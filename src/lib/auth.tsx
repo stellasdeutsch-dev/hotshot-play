@@ -11,6 +11,9 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Role, User } from "./mock-db";
+import { demoUserFor, readDemoUser, writeDemoUser, type DemoRole } from "./demo-user";
+import { demoEnabled } from "./demo-data";
+import { grantDemoSubscription, readDemoSubs } from "./demo-session";
 
 export type DbRole = "player" | "club_admin" | "owner" | "admin";
 
@@ -61,6 +64,12 @@ interface AuthValue {
     club: ClubDraft;
   }) => Promise<AuthResult>;
   resendConfirmation: (email: string) => Promise<AuthResult>;
+  /** True while a local demo identity is active (no Supabase session). */
+  isDemo: boolean;
+  /** Whether the "try without signing up" entry should be offered. */
+  demoAvailable: boolean;
+  /** Signs in with a local demo identity; nothing is written to Supabase. */
+  loginDemo: (role: DemoRole) => void;
   /** Sends a password-recovery email; the link returns the user to /auth?reset=1. */
   resetPassword: (email: string) => Promise<AuthResult>;
   /** Sets a new password for the current (recovery) session. */
@@ -85,6 +94,7 @@ const redirectUrl = () =>
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [demoUser, setDemoUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const draftHandled = useRef(false);
 
@@ -117,6 +127,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ...(staffClubId || profile?.club_id ? { clubId: staffClubId ?? profile?.club_id ?? "" } : {}),
     });
     setLoading(false);
+  }, []);
+
+  // Restore a demo identity before the Supabase session resolves.
+  useEffect(() => {
+    if (!demoEnabled()) return;
+    const stored = readDemoUser();
+    if (stored) {
+      setDemoUser(stored);
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -163,12 +183,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, [session]);
 
+  // A real Supabase session always wins over the local demo identity.
+  const effectiveUser = user ?? demoUser;
+
   const value = useMemo<AuthValue>(
     () => ({
-      user,
-      isAuthenticated: !!user,
-      role: user?.role ?? null,
+      user: effectiveUser,
+      isAuthenticated: !!effectiveUser,
+      role: effectiveUser?.role ?? null,
       loading,
+      isDemo: !user && !!demoUser,
+      demoAvailable: demoEnabled(),
+      loginDemo: (demoRole) => {
+        const next = demoUserFor(demoRole);
+        writeDemoUser(demoRole);
+        // A starter pass so the demo player can book straight away.
+        if (demoRole === "player" && !readDemoSubs().some((s) => s.userId === next.id)) {
+          grantDemoSubscription(next.id, "sub30");
+        }
+        setDemoUser(next);
+        setLoading(false);
+      },
       login: async (email, password) => {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -226,6 +261,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: true };
       },
       logout: async () => {
+        writeDemoUser(null);
+        setDemoUser(null);
         await supabase.auth.signOut();
         setUser(null);
       },
@@ -234,7 +271,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await loadProfile(data.session);
       },
     }),
-    [user, loading, loadProfile],
+    [user, demoUser, effectiveUser, loading, loadProfile],
   );
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;

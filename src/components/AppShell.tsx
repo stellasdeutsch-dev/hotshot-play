@@ -114,7 +114,7 @@ function useUnreadChat(
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { activeSubFor, clubs } = useStore();
-  const { user, isAuthenticated, role, logout } = useAuth();
+  const { user, isAuthenticated, role, logout, isDemo } = useAuth();
   const { t, lang, setLang } = useI18n();
   const { count: cartCount } = useCart();
   const { resolved, toggle } = useTheme();

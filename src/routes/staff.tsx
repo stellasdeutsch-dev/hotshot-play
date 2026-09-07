@@ -217,7 +217,12 @@ function StaffInner() {
         </TabsContent>
         <TabsContent value="chat" className="mt-4">
           {club && (
-            <ClubChatTab clubId={club.id} clubName={club.name} staffName={user?.name ?? ""} />
+            <ClubChatTab
+              clubId={club.id}
+              clubName={club.name}
+              staffName={user?.name ?? ""}
+              staffId={user?.id ?? ""}
+            />
           )}
         </TabsContent>
       </Tabs>
@@ -336,17 +341,19 @@ function ClubChatTab({
   clubId,
   clubName,
   staffName,
+  staffId,
 }: {
   clubId: string;
   clubName: string;
   staffName: string;
+  staffId: string;
 }) {
   const { t, locale } = useI18n();
   const [threads, setThreads] = useState<ChatThread[]>([]);
   const [active, setActive] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const list = await fetchClubThreads(clubId);
+    const list = await fetchClubThreads(clubId, staffId);
     setThreads(list);
     setActive((cur) => cur ?? list[0]?.userId ?? null);
   }, [clubId]);

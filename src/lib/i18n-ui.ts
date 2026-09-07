@@ -212,6 +212,20 @@ export const uiRu: Record<string, string> = {
   "theme.dark": "Тёмная",
   "theme.system": "Как в системе",
   "theme.toggle": "Сменить тему",
+  "demo.title": "Посмотреть без регистрации",
+  "demo.text":
+    "Демо-режим: клубы, брони, магазин и чат работают локально в вашем браузере. Ничего не отправляется на сервер, аккаунт не нужен.",
+  "demo.player": "Как игрок",
+  "demo.playerHint": "Бронь, абонемент, заказы и чат",
+  "demo.owner": "Как владелец клуба",
+  "demo.ownerHint": "Аналитика, товары, настройки",
+  "demo.staff": "Как админ клуба",
+  "demo.staffHint": "Брони, заказы, чат с гостями",
+  "demo.enter": "Войти в демо",
+  "demo.badge": "Демо",
+  "demo.started": "Демо-режим включён",
+  "demo.exit": "Выйти из демо",
+  "demo.note": "Вы в демо-режиме — данные хранятся только в этом браузере.",
 };
 
 export const uiEn: Record<string, string> = {
@@ -425,6 +439,20 @@ export const uiEn: Record<string, string> = {
   "theme.dark": "Dark",
   "theme.system": "System",
   "theme.toggle": "Switch theme",
+  "demo.title": "Try without signing up",
+  "demo.text":
+    "Demo mode: clubs, bookings, the shop and chat run locally in your browser. Nothing is sent to the server and no account is needed.",
+  "demo.player": "As a player",
+  "demo.playerHint": "Booking, pass, orders and chat",
+  "demo.owner": "As a club owner",
+  "demo.ownerHint": "Analytics, products, settings",
+  "demo.staff": "As club staff",
+  "demo.staffHint": "Bookings, orders, guest chat",
+  "demo.enter": "Enter the demo",
+  "demo.badge": "Demo",
+  "demo.started": "Demo mode enabled",
+  "demo.exit": "Leave the demo",
+  "demo.note": "You are in demo mode — data is stored in this browser only.",
 };
 
 export const uiKk: Record<string, string> = {
@@ -640,4 +668,18 @@ export const uiKk: Record<string, string> = {
   "theme.dark": "Қараңғы",
   "theme.system": "Жүйедегідей",
   "theme.toggle": "Тақырыпты ауыстыру",
+  "demo.title": "Тіркелмей көру",
+  "demo.text":
+    "Демо-режим: клубтар, брондар, дүкен және чат браузеріңізде жергілікті жұмыс істейді. Серверге ештеңе жіберілмейді, аккаунт қажет емес.",
+  "demo.player": "Ойыншы ретінде",
+  "demo.playerHint": "Бронь, жазылым, тапсырыс, чат",
+  "demo.owner": "Клуб иесі ретінде",
+  "demo.ownerHint": "Аналитика, тауарлар, баптаулар",
+  "demo.staff": "Клуб әкімшісі ретінде",
+  "demo.staffHint": "Брондар, тапсырыстар, чат",
+  "demo.enter": "Демоға кіру",
+  "demo.badge": "Демо",
+  "demo.started": "Демо-режим қосылды",
+  "demo.exit": "Демодан шығу",
+  "demo.note": "Сіз демо-режимдесіз — деректер тек осы браузерде сақталады.",
 };

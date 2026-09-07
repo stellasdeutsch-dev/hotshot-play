@@ -28,7 +28,7 @@ export const DEMO_CLUBS: Club[] = [
       "Флагманская арена в центре: 65 мест, отдельная VIP-зона на 12 ПК, буткемп для команд и бар. Турниры каждые выходные.",
     cover:
       "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=70",
-    ownerId: "",
+    ownerId: "demo-owner",
     status: "active",
   },
   {
