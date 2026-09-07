@@ -13,10 +13,13 @@ export function SessionRing({
   booking,
   size = 220,
   className,
+  tone = "onLight",
 }: {
   booking: Booking;
   size?: number;
   className?: string;
+  /** "onBlue" renders the labels in white for placement on a blue card. */
+  tone?: "onLight" | "onBlue";
 }) {
   const { t } = useI18n();
   const [now, setNow] = useState(() => new Date());
@@ -38,7 +41,8 @@ export function SessionRing({
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const dash = c * (1 - progress);
-  const tone = phase === "live" ? "var(--blue)" : "var(--lime)";
+  const stroke2 =
+    phase === "live" ? (tone === "onBlue" ? "var(--lime)" : "var(--blue)") : "var(--lime)";
 
   return (
     <div
@@ -50,7 +54,7 @@ export function SessionRing({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke="var(--surface-2)"
+          stroke={tone === "onBlue" ? "rgba(255,255,255,0.25)" : "var(--surface-2)"}
           strokeWidth={stroke}
           fill="none"
         />
@@ -58,7 +62,7 @@ export function SessionRing({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={tone}
+          stroke={stroke2}
           strokeWidth={stroke}
           strokeLinecap="round"
           fill="none"
@@ -69,7 +73,12 @@ export function SessionRing({
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>
-          <p className="text-xs font-medium text-muted-foreground">
+          <p
+            className={cn(
+              "text-xs font-bold",
+              tone === "onBlue" ? "text-white/70" : "text-muted-foreground",
+            )}
+          >
             {phase === "live"
               ? t("session.remaining")
               : phase === "upcoming"
@@ -79,7 +88,12 @@ export function SessionRing({
           <p className="font-display mt-1 text-4xl font-extrabold tabular tracking-tight">
             {phase === "past" ? "00:00" : formatCountdown(remaining)}
           </p>
-          <p className="mt-1 text-[11px] font-semibold text-muted-foreground">
+          <p
+            className={cn(
+              "mt-1 text-[11px] font-bold",
+              tone === "onBlue" ? "text-white/70" : "text-muted-foreground",
+            )}
+          >
             {booking.startTime} · {booking.hours}
             {t("club.hShort")}
           </p>

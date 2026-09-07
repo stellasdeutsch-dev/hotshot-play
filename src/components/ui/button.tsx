@@ -5,25 +5,25 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold cursor-pointer transition-[background,color,transform,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-bold cursor-pointer transition-[background,color,transform,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground hover:bg-[#3aa3ec] shadow-[0_8px_24px_-8px_rgb(42_152_229/0.6)]",
-        lime: "bg-lime text-lime-foreground hover:brightness-105",
-        destructive: "bg-destructive/15 text-destructive hover:bg-destructive/25",
-        outline: "border border-surface-3 bg-transparent text-foreground hover:bg-surface-2",
-        secondary: "bg-surface-2 text-secondary-foreground hover:bg-surface-3",
-        ghost: "text-muted-foreground hover:bg-surface-2 hover:text-foreground",
+          "bg-primary text-primary-foreground hover:bg-[#1f5cf0] shadow-[0_10px_24px_-12px_rgb(46_107_255/0.8)]",
+        lime: "bg-lime text-lime-foreground hover:brightness-[1.03] shadow-[0_10px_24px_-12px_rgb(140_190_20/0.9)]",
+        destructive: "bg-destructive/12 text-destructive hover:bg-destructive/20",
+        outline: "border-2 border-primary/30 bg-transparent text-primary hover:bg-secondary",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-surface-3",
+        ghost: "text-muted-foreground hover:bg-secondary hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-11 px-5",
-        sm: "h-9 rounded-xl px-3.5 text-xs",
-        lg: "h-13 rounded-2xl px-6 text-base",
+        sm: "h-9 px-4 text-xs",
+        lg: "h-13 px-6 text-base",
         icon: "size-11",
-        "icon-sm": "size-9 rounded-xl",
+        "icon-sm": "size-9",
       },
     },
     defaultVariants: {

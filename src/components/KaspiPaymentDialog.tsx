@@ -50,7 +50,7 @@ export function KaspiPaymentDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-2 rounded-xl border border-border bg-secondary/40 p-4 text-sm">
+        <div className="ca-tile space-y-2 p-4 text-sm">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             <QrCode className="size-4 text-primary" /> {t("kaspi.details")}
           </div>
@@ -73,13 +73,15 @@ export function KaspiPaymentDialog({
         </div>
 
         <p className="flex items-start gap-2 text-xs text-muted-foreground">
-          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-accent" />
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-[#6f9b00]" />
           {t("kaspi.moderationHint")}
         </p>
 
         <DialogFooter>
           <Button
             className="w-full"
+            size="lg"
+            variant="lime"
             disabled={sending || receipt.trim().length < 3}
             onClick={async () => {
               setSending(true);

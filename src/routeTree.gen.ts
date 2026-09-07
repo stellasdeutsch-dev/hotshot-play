@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as PartnerRouteImport } from './routes/partner'
 import { Route as PassesRouteImport } from './routes/passes'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as ClubsClubIdRouteImport } from './routes/clubs.$clubId'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -35,6 +37,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PartnerRoute = PartnerRouteImport.update({
   id: '/partner',
   path: '/partner',
@@ -48,6 +55,11 @@ const PassesRoute = PassesRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffRoute = StaffRouteImport.update({
@@ -75,9 +87,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/partner': typeof PartnerRoute
   '/passes': typeof PassesRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/staff': typeof StaffRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -87,9 +101,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/partner': typeof PartnerRoute
   '/passes': typeof PassesRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/staff': typeof StaffRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -100,9 +116,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/partner': typeof PartnerRoute
   '/passes': typeof PassesRoute
   '/profile': typeof ProfileRoute
+  '/shop': typeof ShopRoute
   '/staff': typeof StaffRoute
   '/clubs/$clubId': typeof ClubsClubIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
@@ -114,9 +132,11 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/chat'
     | '/partner'
     | '/passes'
     | '/profile'
+    | '/shop'
     | '/staff'
     | '/clubs/$clubId'
     | '/lovable/email/auth/preview'
@@ -126,9 +146,11 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/chat'
     | '/partner'
     | '/passes'
     | '/profile'
+    | '/shop'
     | '/staff'
     | '/clubs/$clubId'
     | '/lovable/email/auth/preview'
@@ -138,9 +160,11 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/chat'
     | '/partner'
     | '/passes'
     | '/profile'
+    | '/shop'
     | '/staff'
     | '/clubs/$clubId'
     | '/lovable/email/auth/preview'
@@ -151,9 +175,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  ChatRoute: typeof ChatRoute
   PartnerRoute: typeof PartnerRoute
   PassesRoute: typeof PassesRoute
   ProfileRoute: typeof ProfileRoute
+  ShopRoute: typeof ShopRoute
   StaffRoute: typeof StaffRoute
   ClubsClubIdRoute: typeof ClubsClubIdRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
@@ -183,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/partner': {
       id: '/partner'
       path: '/partner'
@@ -202,6 +235,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff': {
@@ -239,9 +279,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  ChatRoute: ChatRoute,
   PartnerRoute: PartnerRoute,
   PassesRoute: PassesRoute,
   ProfileRoute: ProfileRoute,
+  ShopRoute: ShopRoute,
   StaffRoute: StaffRoute,
   ClubsClubIdRoute: ClubsClubIdRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,

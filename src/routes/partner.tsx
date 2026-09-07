@@ -5,7 +5,9 @@ import {
   Clock,
   Gift,
   LayoutDashboard,
+  Plus,
   Settings,
+  ShoppingBag,
   Star,
   Trash2,
   UserPlus,
@@ -26,7 +28,15 @@ import { useStore } from "@/lib/store";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
-import { kzt, last7Days } from "@/lib/mock-db";
+import {
+  kzt,
+  last7Days,
+  PRODUCT_CATEGORIES,
+  type Product,
+  type ProductCategory,
+} from "@/lib/mock-db";
+import { deleteProduct, fetchProducts, upsertProduct } from "@/lib/shop-api";
+import { isDemoClub } from "@/lib/demo-data";
 import {
   addClubStaff,
   listClubStaff,
@@ -79,6 +89,8 @@ function PartnerInner() {
     totalSeats: club?.totalSeats ?? 0,
     openFrom: club?.openFrom ?? "10:00",
     openTo: club?.openTo ?? "02:00",
+    vipSeats: club?.vipSeats ?? 0,
+    vipPricePerHour: club?.vipPricePerHour ?? 0,
     cover: club?.cover ?? "",
     specs: club?.specs ?? "",
     description: club?.description ?? "",
@@ -94,6 +106,8 @@ function PartnerInner() {
       totalSeats: club.totalSeats,
       openFrom: club.openFrom,
       openTo: club.openTo,
+      vipSeats: club.vipSeats,
+      vipPricePerHour: club.vipPricePerHour,
       cover: club.cover,
       specs: club.specs,
       description: club.description,
@@ -102,7 +116,7 @@ function PartnerInner() {
 
   if (!club) {
     return (
-      <div className="neon-panel mx-auto max-w-md p-8 text-center">
+      <div className="ca-card mx-auto max-w-md p-8 text-center">
         <Clock className="mx-auto size-6 text-primary" />
         <h1 className="mt-3 text-lg font-bold">{t("club.pendingTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("club.pendingText")}</p>
@@ -132,7 +146,10 @@ function PartnerInner() {
     (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({
         ...f,
-        [k]: k === "pricePerHour" || k === "totalSeats" ? Number(e.target.value) : e.target.value,
+        [k]:
+          k === "pricePerHour" || k === "totalSeats" || k === "vipSeats" || k === "vipPricePerHour"
+            ? Number(e.target.value)
+            : e.target.value,
       }));
 
   return (
@@ -149,7 +166,7 @@ function PartnerInner() {
       </div>
 
       {club.status !== "active" && (
-        <div className="flex items-start gap-3 rounded-2xl border border-primary/40 bg-primary/10 p-4 text-sm">
+        <div className="ca-card flex items-start gap-3 p-4 text-sm font-semibold">
           <Clock className="mt-0.5 size-5 shrink-0 text-primary" />
           <div className="space-y-2">
             <p className="font-semibold">
@@ -176,8 +193,8 @@ function PartnerInner() {
         </div>
       )}
 
-      <div className="flex items-start gap-3 rounded-2xl border border-accent/40 bg-accent/10 p-4 text-sm">
-        <Gift className="mt-0.5 size-5 shrink-0 text-accent" />
+      <div className="ca-card flex items-start gap-3 p-4 text-sm font-semibold">
+        <Gift className="mt-0.5 size-5 shrink-0 text-[#6f9b00]" />
         <p>{t("partner.free")}</p>
       </div>
 
@@ -189,6 +206,9 @@ function PartnerInner() {
           </TabsTrigger>
           <TabsTrigger value="staff">
             <Users className="size-4" /> {t("partner.tab.staff")}
+          </TabsTrigger>
+          <TabsTrigger value="shop">
+            <ShoppingBag className="size-4" /> {t("partner.tab.shop")}
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="size-4" /> {t("partner.tab.settings")}
@@ -208,15 +228,15 @@ function PartnerInner() {
                 value: String(club.totalSeats),
               },
             ].map((kpi) => (
-              <div key={kpi.label} className="neon-panel p-4">
+              <div key={kpi.label} className="ca-card p-4">
                 <kpi.icon className="size-5 text-primary" />
-                <p className="font-display mt-2 text-xl font-bold">{kpi.value}</p>
+                <p className="font-display mt-2 text-xl font-extrabold">{kpi.value}</p>
                 <p className="text-xs text-muted-foreground">{kpi.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="neon-panel p-5">
+          <div className="ca-card p-5">
             <p className="text-sm font-semibold">{t("partner.chart")}</p>
             <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -262,13 +282,13 @@ function PartnerInner() {
 
         <TabsContent value="reviews" className="mt-4 space-y-3">
           {clubReviews.length === 0 && (
-            <p className="neon-panel p-8 text-center text-sm text-muted-foreground">
+            <p className="ca-card p-8 text-center text-sm text-muted-foreground">
               {t("partner.noReviews")}
             </p>
           )}
           {clubReviews.map((r) => (
-            <div key={r.id} className="neon-panel flex items-start gap-3 p-4">
-              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/20 text-xs font-bold">
+            <div key={r.id} className="ca-card flex items-start gap-3 p-4">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-xs font-extrabold text-primary-foreground">
                 {(r.authorName || "—").slice(0, 2).toUpperCase()}
               </span>
               <div className="flex-1">
@@ -280,7 +300,7 @@ function PartnerInner() {
                         key={i}
                         className={cn(
                           "size-3.5",
-                          i <= r.rating ? "fill-accent text-accent" : "text-muted-foreground/40",
+                          i <= r.rating ? "fill-star text-star" : "text-muted-foreground/25",
                         )}
                       />
                     ))}
@@ -297,8 +317,12 @@ function PartnerInner() {
           <StaffManager clubId={club.id} />
         </TabsContent>
 
+        <TabsContent value="shop" className="mt-4">
+          <ShopManager clubId={club.id} />
+        </TabsContent>
+
         <TabsContent value="settings" className="mt-4">
-          <div className="neon-panel max-w-2xl space-y-4 p-5 sm:p-6">
+          <div className="ca-card max-w-2xl space-y-4 p-5 sm:p-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>{t("partner.clubName")}</Label>
@@ -333,6 +357,26 @@ function PartnerInner() {
               <div className="space-y-1.5">
                 <Label>{t("partner.closes")}</Label>
                 <Input value={form.openTo} onChange={set("openTo")} placeholder="02:00" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t("partner.vipSeats")}</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  max={form.totalSeats}
+                  value={form.vipSeats}
+                  onChange={set("vipSeats")}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t("partner.vipPrice")}</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  step={50}
+                  value={form.vipPricePerHour}
+                  onChange={set("vipPricePerHour")}
+                />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
                 <Label>{t("partner.cover")}</Label>
@@ -400,7 +444,7 @@ function StaffManager({ clubId }: { clubId: string }) {
   }, [clubId]);
 
   return (
-    <div className="neon-panel max-w-2xl space-y-4 p-5 sm:p-6">
+    <div className="ca-card max-w-2xl space-y-4 p-5 sm:p-6">
       <p className="text-sm text-muted-foreground">{t("partner.staffHint")}</p>
       <div className="flex flex-wrap gap-2">
         <Input
@@ -444,7 +488,7 @@ function StaffManager({ clubId }: { clubId: string }) {
               key={m.id}
               className="flex items-center gap-3 rounded-xl border border-border bg-card/60 p-3"
             >
-              <span className="grid size-9 place-items-center rounded-lg bg-primary/20 text-xs font-bold">
+              <span className="grid size-9 place-items-center rounded-full bg-primary text-xs font-extrabold text-primary-foreground">
                 {m.name.slice(0, 2).toUpperCase()}
               </span>
               <div className="min-w-0 flex-1">
@@ -466,6 +510,181 @@ function StaffManager({ clubId }: { clubId: string }) {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+/* ------------------------------ Shop manager ------------------------------ */
+
+const EMPTY_PRODUCT = {
+  name: "",
+  category: "drinks" as ProductCategory,
+  sizeLabel: "",
+  priceKzt: 0,
+  oldPriceKzt: "",
+  imageUrl: "",
+  description: "",
+};
+
+function ShopManager({ clubId }: { clubId: string }) {
+  const { t } = useI18n();
+  const [items, setItems] = useState<Product[]>([]);
+  const [form, setForm] = useState(EMPTY_PRODUCT);
+  const [busy, setBusy] = useState(false);
+  const demo = isDemoClub(clubId);
+
+  const load = async () => setItems(await fetchProducts(clubId));
+
+  useEffect(() => {
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clubId]);
+
+  const add = async () => {
+    if (!form.name.trim()) return;
+    setBusy(true);
+    const created = await upsertProduct({
+      clubId,
+      category: form.category,
+      name: form.name.trim(),
+      description: form.description.trim(),
+      sizeLabel: form.sizeLabel.trim(),
+      priceKzt: Number(form.priceKzt) || 0,
+      oldPriceKzt: form.oldPriceKzt ? Number(form.oldPriceKzt) : null,
+      imageUrl: form.imageUrl.trim(),
+      isActive: true,
+      sortOrder: items.length + 1,
+    });
+    setBusy(false);
+    if (!created) {
+      toast.error(t("partner.staffError"));
+      return;
+    }
+    setForm(EMPTY_PRODUCT);
+    toast.success(t("partner.p.added"));
+    await load();
+  };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[380px_1fr]">
+      <section className="ca-card h-fit space-y-3 p-5">
+        <h3 className="font-display text-lg font-extrabold">{t("partner.newProduct")}</h3>
+        {demo && (
+          <p className="ca-tile p-3 text-xs font-semibold text-muted-foreground">
+            {t("partner.p.demo")}
+          </p>
+        )}
+        <div className="space-y-1.5">
+          <Label>{t("partner.p.name")}</Label>
+          <Input
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>{t("partner.p.category")}</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {PRODUCT_CATEGORIES.map((c) => (
+              <button
+                key={c}
+                onClick={() => setForm((f) => ({ ...f, category: c }))}
+                className={cn("ca-chip", form.category === c && "ca-chip-active")}
+              >
+                {t(`shop.cat.${c}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label>{t("partner.p.price")}</Label>
+            <Input
+              type="number"
+              min={0}
+              value={form.priceKzt}
+              onChange={(e) => setForm((f) => ({ ...f, priceKzt: Number(e.target.value) }))}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label>{t("partner.p.oldPrice")}</Label>
+            <Input
+              type="number"
+              min={0}
+              value={form.oldPriceKzt}
+              onChange={(e) => setForm((f) => ({ ...f, oldPriceKzt: e.target.value }))}
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label>{t("partner.p.size")}</Label>
+          <Input
+            value={form.sizeLabel}
+            onChange={(e) => setForm((f) => ({ ...f, sizeLabel: e.target.value }))}
+            placeholder="500 мл"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>{t("partner.p.image")}</Label>
+          <Input
+            value={form.imageUrl}
+            onChange={(e) => setForm((f) => ({ ...f, imageUrl: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>{t("partner.p.desc")}</Label>
+          <Textarea
+            rows={2}
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+          />
+        </div>
+        <Button
+          className="w-full"
+          variant="lime"
+          disabled={busy || demo || !form.name.trim()}
+          onClick={add}
+        >
+          <Plus className="size-4" /> {t("partner.p.add")}
+        </Button>
+      </section>
+
+      <section>
+        {items.length === 0 ? (
+          <p className="ca-card p-8 text-center text-sm font-semibold text-muted-foreground">
+            {t("partner.p.empty")}
+          </p>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {items.map((p) => (
+              <div key={p.id} className="ca-card flex items-center gap-3 p-3">
+                <div className="size-16 shrink-0 overflow-hidden rounded-2xl bg-secondary">
+                  {p.imageUrl && <img src={p.imageUrl} alt="" className="size-full object-cover" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-extrabold">{p.name}</p>
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    {kzt(p.priceKzt)} · {t(`shop.cat.${p.category}`)}
+                  </p>
+                </div>
+                {!demo && (
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    aria-label={t("order.cancel")}
+                    onClick={async () => {
+                      await deleteProduct(p.id);
+                      toast.success(t("partner.p.deleted"));
+                      await load();
+                    }}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

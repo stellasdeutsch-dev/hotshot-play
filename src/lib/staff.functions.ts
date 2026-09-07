@@ -14,7 +14,11 @@ async function assertClubAccess(
   userId: string,
   clubId: string,
 ) {
-  const { data: club } = await supabase.from("clubs").select("id, owner_id").eq("id", clubId).maybeSingle();
+  const { data: club } = await supabase
+    .from("clubs")
+    .select("id, owner_id")
+    .eq("id", clubId)
+    .maybeSingle();
   if (club?.owner_id === userId) return;
   const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
   if (!isAdmin) throw new Error("Forbidden");
@@ -32,7 +36,10 @@ export const listClubStaff = createServerFn({ method: "POST" })
       .eq("club_id", data.clubId);
     const ids = (rows ?? []).map((r) => r.user_id);
     if (ids.length === 0) return [];
-    const { data: profiles } = await supabaseAdmin.from("profiles").select("id, name, email").in("id", ids);
+    const { data: profiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, name, email")
+      .in("id", ids);
     const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
     return (rows ?? []).map((r) => ({
       id: r.id,
@@ -76,9 +83,17 @@ export const removeClubStaff = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: boolean }> => {
     await assertClubAccess(context.supabase as never, context.userId, data.clubId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("club_staff").delete().eq("club_id", data.clubId).eq("user_id", data.userId);
+    await supabaseAdmin
+      .from("club_staff")
+      .delete()
+      .eq("club_id", data.clubId)
+      .eq("user_id", data.userId);
     await supabaseAdmin.from("profiles").update({ club_id: null }).eq("id", data.userId);
-    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.userId).eq("role", "club_admin");
+    await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.userId)
+      .eq("role", "club_admin");
     await supabaseAdmin
       .from("user_roles")
       .upsert({ user_id: data.userId, role: "player" }, { onConflict: "user_id,role" });

@@ -21,6 +21,8 @@ export const DEMO_CLUBS: Club[] = [
     openTo: "24:00",
     pricePerHour: 900,
     totalSeats: 65,
+    vipSeats: 12,
+    vipPricePerHour: 1400,
     specs: "RTX 4070 · i7-13700K · 32 GB · 240 Hz · HyperX",
     description:
       "Флагманская арена в центре: 65 мест, отдельная VIP-зона на 12 ПК, буткемп для команд и бар. Турниры каждые выходные.",
@@ -43,6 +45,8 @@ export const DEMO_CLUBS: Club[] = [
     openTo: "02:00",
     pricePerHour: 700,
     totalSeats: 42,
+    vipSeats: 8,
+    vipPricePerHour: 1100,
     specs: "RTX 4060 Ti · i5-13600K · 32 GB · 165 Hz",
     description: "Уютный клуб на левом берегу с быстрым интернетом 1 Гбит/с и зоной PS5.",
     cover:
@@ -64,6 +68,8 @@ export const DEMO_CLUBS: Club[] = [
     openTo: "00:00",
     pricePerHour: 500,
     totalSeats: 28,
+    vipSeats: 0,
+    vipPricePerHour: 0,
     specs: "RTX 3060 · Ryzen 5 5600 · 16 GB · 144 Hz",
     description: "Бюджетный клуб на правом берегу рядом с ЕНУ. Скидки студентам днём.",
     cover:
@@ -85,6 +91,8 @@ export const DEMO_CLUBS: Club[] = [
     openTo: "24:00",
     pricePerHour: 1200,
     totalSeats: 80,
+    vipSeats: 20,
+    vipPricePerHour: 1900,
     specs: "RTX 4080 · i9-14900K · 64 GB · 360 Hz · Zowie",
     description:
       "Премиум-арена у EXPO: 80 мест, сцена на 200 зрителей, стриминг-комнаты и киберспортивная школа.",
@@ -107,6 +115,8 @@ export const DEMO_CLUBS: Club[] = [
     openTo: "01:00",
     pricePerHour: 450,
     totalSeats: 20,
+    vipSeats: 0,
+    vipPricePerHour: 0,
     specs: "RTX 3050 · i5-12400F · 16 GB · 144 Hz",
     description: "Небольшой клуб для своих: 20 мест, консольная зона, чай и кофе без ограничений.",
     cover:
@@ -128,6 +138,8 @@ export const DEMO_CLUBS: Club[] = [
     openTo: "24:00",
     pricePerHour: 800,
     totalSeats: 50,
+    vipSeats: 10,
+    vipPricePerHour: 1200,
     specs: "RTX 4070 Super · Ryzen 7 7800X3D · 32 GB · 240 Hz",
     description:
       "Клуб в ЖК Хайвил: два зала, VIP-комнаты на 5 человек, парковка и доставка еды к месту.",

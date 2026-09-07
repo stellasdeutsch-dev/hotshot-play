@@ -16,6 +16,7 @@ import { AuthProvider } from "@/lib/auth";
 import { I18nProvider } from "@/lib/i18n";
 import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
+import { CartProvider } from "@/lib/cart";
 
 function NotFoundComponent() {
   return (
@@ -82,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#030405" },
+      { name: "theme-color", content: "#edf1ff" },
       { title: "HotShot Play — Computer Club Aggregator in Kazakhstan" },
       {
         name: "description",
@@ -117,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="ru" className="dark">
+    <html lang="ru">
       <head>
         <HeadContent />
       </head>
@@ -137,11 +138,13 @@ function RootComponent() {
       <I18nProvider>
         <AuthProvider>
           <StoreProvider>
-            <AppShell>
-              {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-              <Outlet />
-            </AppShell>
-            <Toaster position="top-center" />
+            <CartProvider>
+              <AppShell>
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+              </AppShell>
+              <Toaster position="top-center" />
+            </CartProvider>
           </StoreProvider>
         </AuthProvider>
       </I18nProvider>

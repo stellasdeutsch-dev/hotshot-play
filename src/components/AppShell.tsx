@@ -5,17 +5,20 @@ import {
   LayoutDashboard,
   LogIn,
   LogOut,
+  MessageCircle,
   Monitor,
   ShieldCheck,
+  ShoppingBag,
   Ticket,
   User,
-  Wallet,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { LANGS, useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
+import { useCart } from "@/lib/cart";
+import { fetchUnreadForPlayer } from "@/lib/chat-api";
 import { Button } from "@/components/ui/button";
 import { LogoMark, LogoWordmark } from "@/components/Logo";
 import type { Role } from "@/lib/mock-db";
@@ -26,6 +29,7 @@ type NavItem = {
   icon: typeof Home;
   center?: boolean;
   search?: Record<string, string>;
+  badge?: "cart" | "chat";
 };
 
 const NAV: Record<Role | "guest", NavItem[]> = {
@@ -36,7 +40,7 @@ const NAV: Record<Role | "guest", NavItem[]> = {
   ],
   player: [
     { to: "/", label: "nav.home", icon: Home },
-    { to: "/passes", label: "nav.subs", icon: Ticket },
+    { to: "/shop", label: "nav.shop", icon: ShoppingBag, badge: "cart" },
     {
       to: "/profile",
       label: "nav.session",
@@ -44,7 +48,7 @@ const NAV: Record<Role | "guest", NavItem[]> = {
       center: true,
       search: { tab: "session" },
     },
-    { to: "/profile", label: "nav.wallet", icon: Wallet, search: { tab: "wallet" } },
+    { to: "/chat", label: "nav.chat", icon: MessageCircle, badge: "chat" },
     { to: "/profile", label: "nav.profile", icon: User, search: { tab: "profile" } },
   ],
   clubAdmin: [
@@ -61,34 +65,76 @@ const NAV: Record<Role | "guest", NavItem[]> = {
   ],
 };
 
-function useActiveTab() {
-  return useRouterState({
+/** Extra desktop-header links; the bottom bar stays mobile-only. */
+const HEADER_EXTRA: Record<Role | "guest", NavItem[]> = {
+  guest: [],
+  player: [{ to: "/passes", label: "nav.subs", icon: Ticket }],
+  clubAdmin: [],
+  owner: [],
+  admin: [],
+};
+
+function isActive(item: NavItem, pathname: string, tab: string | null) {
+  if (item.to !== pathname) return false;
+  if (item.search?.["tab"] === undefined) return true;
+  return item.search["tab"] === (tab ?? "session");
+}
+
+/** Unread club replies for the chat badge; refreshed on navigation. */
+function useUnreadChat(
+  userId: string | null,
+  clubKey: string,
+  clubIds: string[],
+  pathname: string,
+) {
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    if (!userId) {
+      setUnread(0);
+      return;
+    }
+    let alive = true;
+    const run = () => {
+      void fetchUnreadForPlayer(userId, clubIds).then((n) => alive && setUnread(n));
+    };
+    run();
+    const id = window.setInterval(run, 30_000);
+    return () => {
+      alive = false;
+      window.clearInterval(id);
+    };
+    // clubIds is represented by the stable clubKey string
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, clubKey, pathname]);
+  return unread;
+}
+
+export function AppShell({ children }: { children: ReactNode }) {
+  const { activeSubFor, clubs } = useStore();
+  const { user, isAuthenticated, role, logout } = useAuth();
+  const { t, lang, setLang } = useI18n();
+  const { count: cartCount } = useCart();
+  const { pathname, tab } = useRouterState({
     select: (s) => ({
       pathname: s.location.pathname,
       tab: (s.location.search as { tab?: string }).tab ?? null,
     }),
   });
-}
 
-function isActive(item: NavItem, pathname: string, tab: string | null) {
-  if (item.to !== pathname) return false;
-  if (item.search?.["tab"] === undefined) return true;
-  const current = tab ?? "session";
-  return item.search["tab"] === current;
-}
-
-export function AppShell({ children }: { children: ReactNode }) {
-  const { activeSubFor } = useStore();
-  const { user, isAuthenticated, role, logout } = useAuth();
-  const { t, lang, setLang } = useI18n();
-  const { pathname, tab } = useActiveTab();
   const nav = NAV[role ?? "guest"];
+  const headerNav = [...nav.filter((i) => i.to !== "/auth"), ...HEADER_EXTRA[role ?? "guest"]];
   const sub = role === "player" && user ? activeSubFor(user.id) : undefined;
-  const hoursLabel = sub
-    ? sub.hoursLeft === null
-      ? "∞"
-      : `${sub.hoursLeft} ${t("home.balanceHours")}`
-    : `0 ${t("home.balanceHours")}`;
+  const hours = sub ? (sub.hoursLeft === null ? "∞" : String(sub.hoursLeft)) : "0";
+  const clubIds = clubs.map((c) => c.id);
+  const unread = useUnreadChat(
+    role === "player" ? (user?.id ?? null) : null,
+    clubIds.join(","),
+    clubIds,
+    pathname,
+  );
+
+  const badgeValue = (kind: NavItem["badge"]) =>
+    kind === "cart" ? cartCount : kind === "chat" ? unread : 0;
 
   return (
     <div className="min-h-screen pb-28 md:pb-10">
@@ -99,14 +145,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <LogoWordmark className="hidden sm:inline" />
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-1 rounded-full bg-surface p-1 md:flex">
-            {nav.map((item) => (
+          <nav className="ml-2 hidden items-center gap-1 rounded-full bg-card p-1.5 shadow-[0_10px_30px_-18px_rgb(11_20_55/0.35)] md:flex">
+            {headerNav.map((item) => (
               <Link
-                key={item.label}
+                key={`${item.to}-${item.label}`}
                 to={item.to}
                 search={item.search as never}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground",
+                  "rounded-full px-4 py-2 text-sm font-bold text-muted-foreground transition-colors hover:text-foreground",
                   isActive(item, pathname, tab) &&
                     "bg-primary text-primary-foreground hover:text-primary-foreground",
                 )}
@@ -120,17 +166,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             {role === "player" && (
               <Link
                 to="/passes"
-                className="flex items-center gap-2 rounded-full bg-surface py-1.5 pl-3 pr-1.5 text-xs font-bold transition-colors hover:bg-surface-2"
+                className="flex items-center gap-2 rounded-full bg-card py-1.5 pl-3.5 pr-1.5 text-xs font-extrabold shadow-[0_10px_30px_-18px_rgb(11_20_55/0.35)] transition-transform hover:-translate-y-0.5"
               >
-                <span className="tabular">{hoursLabel}</span>
-                <span className="grid size-7 place-items-center rounded-full bg-primary text-primary-foreground">
+                <span className="tabular">
+                  {hours} {t("home.balanceHours")}
+                </span>
+                <span className="grid size-7 place-items-center rounded-full bg-lime text-lime-foreground">
                   +
                 </span>
               </Link>
             )}
 
             <div
-              className="hidden rounded-full bg-surface p-1 text-xs font-bold sm:flex"
+              className="hidden rounded-full bg-card p-1 text-xs font-bold shadow-[0_10px_30px_-18px_rgb(11_20_55/0.35)] sm:flex"
               role="group"
               aria-label={t("lang.label")}
             >
@@ -142,7 +190,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   className={cn(
                     "rounded-full px-2.5 py-1.5 transition-all",
                     lang === l.code
-                      ? "bg-surface-2 text-foreground"
+                      ? "bg-secondary text-foreground"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -154,9 +202,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 <Link
-                  to={role === "player" ? "/profile" : (nav[nav.length - 1]?.to ?? "/")}
+                  to={role === "player" ? "/profile" : (nav[1]?.to ?? "/")}
                   {...(role === "player" ? { search: { tab: "profile" } as never } : {})}
-                  className="flex items-center gap-2 rounded-full bg-surface py-1 pl-1 pr-3 transition-colors hover:bg-surface-2"
+                  className="flex items-center gap-2 rounded-full bg-card py-1 pl-1 pr-3 shadow-[0_10px_30px_-18px_rgb(11_20_55/0.35)] transition-transform hover:-translate-y-0.5"
                 >
                   <span className="grid size-8 place-items-center rounded-full bg-primary text-[11px] font-extrabold text-primary-foreground">
                     {user?.avatarInitials}
@@ -165,7 +213,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <span className="block max-w-28 truncate text-xs font-bold leading-tight">
                       {user?.name}
                     </span>
-                    <span className="block text-[10px] font-medium leading-tight text-muted-foreground">
+                    <span className="block text-[10px] font-semibold leading-tight text-muted-foreground">
                       {t(`role.${role}`)}
                     </span>
                   </span>
@@ -192,27 +240,26 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="mx-auto max-w-6xl px-4 py-4 sm:py-8">{children}</main>
 
-      {/* Mobile bottom navigation with raised centre action */}
+      {/* Mobile bottom navigation — blue bar with a raised centre action */}
       <nav className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden">
-        <div className="mx-auto flex max-w-md items-end justify-around rounded-[1.75rem] bg-surface px-2 pb-2 pt-2 shadow-[0_-10px_40px_rgb(0_0_0/0.6)]">
+        <div className="mx-auto flex max-w-md items-center justify-around rounded-[1.9rem] bg-primary px-2 py-2.5 shadow-[0_18px_44px_-16px_rgb(46_107_255/0.75)]">
           {nav.map((item) => {
             const Icon = item.icon;
             const active = isActive(item, pathname, tab);
+            const badge = badgeValue(item.badge);
             if (item.center) {
               return (
                 <Link
-                  key={item.label}
+                  key={`${item.to}-${item.label}`}
                   to={item.to}
                   search={item.search as never}
                   aria-label={t(item.label)}
-                  className="-mt-7 flex flex-col items-center gap-1"
+                  className="-mt-8 flex flex-col items-center"
                 >
                   <span
                     className={cn(
                       "grid size-14 place-items-center rounded-full border-[5px] border-background transition-colors",
-                      active
-                        ? "bg-primary text-primary-foreground shadow-[0_10px_30px_rgb(42_152_229/0.6)]"
-                        : "bg-surface-2 text-foreground",
+                      active ? "bg-lime text-lime-foreground" : "bg-card text-primary",
                     )}
                   >
                     <Icon className="size-6" />
@@ -222,15 +269,22 @@ export function AppShell({ children }: { children: ReactNode }) {
             }
             return (
               <Link
-                key={item.label}
+                key={`${item.to}-${item.label}`}
                 to={item.to}
                 search={item.search as never}
                 className={cn(
-                  "flex min-w-14 flex-col items-center gap-1 rounded-2xl px-2 py-1.5 text-[10px] font-semibold transition-colors",
-                  active ? "text-primary" : "text-muted-foreground",
+                  "relative flex min-w-14 flex-col items-center gap-1 rounded-2xl px-2 py-1 text-[10px] font-bold transition-colors",
+                  active ? "text-white" : "text-white/60",
                 )}
               >
-                <Icon className="size-5" />
+                <span className="relative">
+                  <Icon className="size-5" />
+                  {badge > 0 && (
+                    <span className="absolute -right-2 -top-1.5 grid min-w-4 place-items-center rounded-full bg-lime px-1 text-[9px] font-extrabold text-lime-foreground">
+                      {badge > 9 ? "9+" : badge}
+                    </span>
+                  )}
+                </span>
                 {t(item.label)}
               </Link>
             );

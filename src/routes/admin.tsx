@@ -50,16 +50,16 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const STATUS_VARIANT: Record<ClubStatus, "default" | "secondary" | "outline" | "destructive"> = {
-  pending: "secondary",
-  active: "default",
-  rejected: "outline",
+const STATUS_VARIANT: Record<ClubStatus, "default" | "lime" | "muted" | "destructive"> = {
+  pending: "default",
+  active: "lime",
+  rejected: "muted",
   suspended: "destructive",
 };
 
-const ROLE_VARIANT: Record<Role, "default" | "secondary" | "outline" | "destructive"> = {
+const ROLE_VARIANT: Record<Role, "default" | "secondary" | "muted" | "destructive"> = {
   player: "secondary",
-  clubAdmin: "outline",
+  clubAdmin: "muted",
   owner: "default",
   admin: "destructive",
 };
@@ -151,9 +151,9 @@ function AdminInner() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi) => (
-          <div key={kpi.label} className="neon-panel p-4">
+          <div key={kpi.label} className="ca-card p-4">
             <kpi.icon className="size-5 text-primary" />
-            <p className="font-display mt-2 text-xl font-bold">{kpi.value}</p>
+            <p className="font-display mt-2 text-xl font-extrabold">{kpi.value}</p>
             <p className="text-xs text-muted-foreground">{kpi.label}</p>
           </div>
         ))}
@@ -176,15 +176,15 @@ function AdminInner() {
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          <div className="neon-panel p-5">
+          <div className="ca-card p-5">
             <p className="text-sm font-semibold">{t("admin.chart")}</p>
             <div className="mt-4 h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={gmvSeries}>
                   <defs>
                     <linearGradient id="adminRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.5} />
-                      <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
+                      <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.5} />
+                      <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" />
@@ -206,7 +206,7 @@ function AdminInner() {
                   <Area
                     type="monotone"
                     dataKey="revenue"
-                    stroke="var(--color-accent)"
+                    stroke="var(--color-primary)"
                     fill="url(#adminRev)"
                     strokeWidth={2}
                   />
@@ -219,15 +219,15 @@ function AdminInner() {
         <TabsContent value="clubs" className="mt-4 space-y-6">
           {/* Applications */}
           <section>
-            <h2 className="font-display text-lg font-bold">{t("admin.applications")}</h2>
+            <h2 className="font-display text-lg font-extrabold">{t("admin.applications")}</h2>
             {pending.length === 0 ? (
-              <p className="neon-panel mt-3 p-6 text-center text-sm text-muted-foreground">
+              <p className="ca-card mt-3 p-6 text-center text-sm text-muted-foreground">
                 {t("admin.noApps")}
               </p>
             ) : (
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 {pending.map((club) => (
-                  <div key={club.id} className="neon-panel overflow-hidden">
+                  <div key={club.id} className="ca-card overflow-hidden">
                     <div className="h-16" style={{ background: club.cover }} />
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-2">
@@ -242,7 +242,7 @@ function AdminInner() {
                             {t("home.perHour")}
                           </p>
                         </div>
-                        <Badge variant="secondary">{t("status.pending")}</Badge>
+                        <Badge>{t("status.pending")}</Badge>
                       </div>
                       <div className="mt-3 space-y-2">
                         <Input
@@ -285,7 +285,7 @@ function AdminInner() {
           </section>
 
           {/* All clubs */}
-          <section className="neon-panel overflow-x-auto">
+          <section className="ca-card overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -356,7 +356,7 @@ function AdminInner() {
         </TabsContent>
 
         <TabsContent value="users" className="mt-4">
-          <div className="neon-panel overflow-x-auto">
+          <div className="ca-card overflow-x-auto">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -370,7 +370,7 @@ function AdminInner() {
                 {allUsers.map((u) => (
                   <tr key={u.id} className="border-b border-border/50 last:border-0">
                     <td className="p-3">
-                      <span className="mr-2 inline-grid size-7 place-items-center rounded-lg bg-primary/20 align-middle text-[10px] font-bold">
+                      <span className="mr-2 inline-grid size-7 place-items-center rounded-full bg-primary align-middle text-[10px] font-extrabold text-primary-foreground">
                         {u.name.slice(0, 2).toUpperCase()}
                       </span>
                       {u.name}
@@ -437,8 +437,8 @@ function SubscriptionsTab() {
   };
 
   return (
-    <div className="neon-panel p-5">
-      <h2 className="font-display flex items-center gap-2 text-lg font-bold">
+    <div className="ca-card p-5">
+      <h2 className="font-display flex items-center gap-2 text-lg font-extrabold">
         <Ban className="size-5 text-primary" /> {t("adminSubs.title")}
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">{t("adminSubs.hint")}</p>
@@ -447,7 +447,7 @@ function SubscriptionsTab() {
       ) : (
         <div className="mt-4 space-y-3">
           {rows.map((s) => (
-            <div key={s.id} className="rounded-xl border border-border bg-card/60 p-4">
+            <div key={s.id} className="ca-tile p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold">{s.playerName}</p>
@@ -459,10 +459,10 @@ function SubscriptionsTab() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-display text-lg font-bold text-accent">
+                  <p className="font-display text-lg font-extrabold text-primary">
                     {s.hoursLeft === null ? "∞" : `${s.hoursLeft}/${s.hoursTotal ?? s.hoursLeft}`}
                   </p>
-                  <Badge variant={s.status === "active" ? "default" : "outline"}>
+                  <Badge variant={s.status === "active" ? "lime" : "muted"}>
                     {t(`adminSubs.status.${s.status}`)}
                   </Badge>
                 </div>
@@ -548,8 +548,8 @@ function PaymentsTab() {
 
   return (
     <div className="space-y-6">
-      <section className="neon-panel p-5">
-        <h2 className="font-display flex items-center gap-2 text-lg font-bold">
+      <section className="ca-card p-5">
+        <h2 className="font-display flex items-center gap-2 text-lg font-extrabold">
           <Receipt className="size-5 text-primary" /> {t("adminPay.queue")}
           {pendingRows.length > 0 && (
             <span className="grid size-5 place-items-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
@@ -562,14 +562,16 @@ function PaymentsTab() {
         ) : (
           <div className="mt-4 space-y-3">
             {pendingRows.map((p) => (
-              <div key={p.id} className="rounded-xl border border-border bg-card/60 p-4">
+              <div key={p.id} className="ca-tile p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold">{p.playerName}</p>
                     <p className="text-xs text-muted-foreground">{p.playerPhone}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-display text-lg font-bold text-accent">{kzt(p.amountKzt)}</p>
+                    <p className="font-display text-lg font-extrabold text-primary">
+                      {kzt(p.amountKzt)}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {p.planId ? t(`plan.${p.planId}.name`) : "—"}
                     </p>
@@ -611,7 +613,7 @@ function PaymentsTab() {
         )}
       </section>
 
-      <section className="neon-panel overflow-x-auto">
+      <section className="ca-card overflow-x-auto">
         <table className="w-full min-w-[600px] text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
@@ -632,7 +634,7 @@ function PaymentsTab() {
                 <td className="p-3 text-muted-foreground">{p.receiptNumber || "—"}</td>
                 <td className="p-3">{kzt(p.amountKzt)}</td>
                 <td className="p-3">
-                  <Badge variant={p.status === "approved" ? "default" : "destructive"}>
+                  <Badge variant={p.status === "approved" ? "lime" : "destructive"}>
                     {t(`payStatus.${p.status}`)}
                   </Badge>
                 </td>

@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { isImageCover } from "@/lib/club-utils";
 import { cn } from "@/lib/utils";
 
-const FALLBACK = "linear-gradient(135deg, #1f7fc4 0%, #181c1f 70%)";
+const FALLBACK = "linear-gradient(135deg, #2E6BFF 0%, #0B1437 85%)";
 
 /**
  * Club cover: renders a photo when `cover` is a URL, otherwise the stored CSS
@@ -12,19 +12,22 @@ export function ClubCover({
   cover,
   alt,
   className,
+  overlay = true,
   children,
 }: {
   cover: string;
   alt: string;
   className?: string;
-  children?: React.ReactNode;
+  /** Dark scrim for text placed on top of the image. */
+  overlay?: boolean;
+  children?: ReactNode;
 }) {
   const [broken, setBroken] = useState(false);
   const image = isImageCover(cover) && !broken;
 
   return (
     <div
-      className={cn("relative overflow-hidden bg-surface-2", className)}
+      className={cn("relative overflow-hidden bg-secondary", className)}
       style={image ? undefined : { background: cover && !isImageCover(cover) ? cover : FALLBACK }}
     >
       {image && (
@@ -37,10 +40,12 @@ export function ClubCover({
         />
       )}
       {!image && <div className="grid-bg absolute inset-0 opacity-60" aria-hidden />}
-      <div
-        className="absolute inset-0 bg-gradient-to-t from-surface/90 via-surface/10 to-transparent"
-        aria-hidden
-      />
+      {overlay && (
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-[#0b1437]/85 via-[#0b1437]/15 to-transparent"
+          aria-hidden
+        />
+      )}
       {children}
     </div>
   );

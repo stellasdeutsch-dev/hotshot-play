@@ -5,16 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * HotShot Play design system — "Cyber Arena" style.
+ * HotShot Play design system.
  *
- * Palette (from the reference):
- *   ink      #030405  — page background
- *   surface  #181C1F  — cards, inputs, nav
- *   surface2 #22272B  — nested tiles / hover
- *   blue     #2A98E5  — primary action
- *   lime     #BAF33F  — price tags / success accent
+ * Palette (from the reference app):
+ *   ink      #0B1437  — headlines, dark hero blocks
+ *   canvas   #EDF1FF  — page background (light lavender)
+ *   card     #FFFFFF  — cards and sheets
+ *   blue     #2E6BFF  — primary actions, nav bar, active states
+ *   lime     #C2F14E  — main CTA, highlights, progress
  *
- * Typography: Montserrat (free stand-in for Proxima Nova).
+ * Typography: Montserrat.
  */
 
 @theme inline {
@@ -60,8 +60,10 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-lime: var(--lime);
   --color-lime-foreground: var(--lime-foreground);
-  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-surface: var(--card);
   --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
   --color-star: var(--star);
   --color-neon: var(--primary);
   --color-neon-cyan: var(--lime);
@@ -72,82 +74,75 @@
 :root {
   --radius: 1rem;
 
-  --ink: #030405;
-  --surface: #181c1f;
-  --surface-2: #22272b;
-  --surface-3: #2b3136;
-  --blue: #2a98e5;
-  --blue-deep: #1f7fc4;
-  --lime: #baf33f;
+  --ink: #0b1437;
+  --canvas: #edf1ff;
+  --surface-2: #eef2ff; /* tinted tile inside a white card */
+  --surface-3: #dfe6ff; /* borders / hover */
+  --blue: #2e6bff;
+  --blue-soft: #e7edff;
+  --lime: #c2f14e;
 
-  --background: var(--ink);
-  --foreground: #f5f7fa;
-  --card: var(--surface);
-  --card-foreground: #f5f7fa;
-  --popover: var(--surface);
-  --popover-foreground: #f5f7fa;
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
   --primary: var(--blue);
   --primary-foreground: #ffffff;
   --secondary: var(--surface-2);
-  --secondary-foreground: #f5f7fa;
+  --secondary-foreground: var(--ink);
   --muted: var(--surface-2);
-  --muted-foreground: #8b949e;
+  --muted-foreground: #6e7796;
   --accent: var(--lime);
-  --accent-foreground: #0b0d0f;
-  --lime-foreground: #0b0d0f;
-  --destructive: #ef4b4b;
+  --accent-foreground: #16204a;
+  --lime-foreground: #16204a;
+  --destructive: #e5484d;
   --destructive-foreground: #ffffff;
-  --border: #262b30;
-  --input: var(--surface);
+  --border: #e3e8fb;
+  --input: #ffffff;
   --ring: var(--blue);
-  --star: #ffc531;
+  --star: #ffb020;
   --chart-1: var(--blue);
-  --chart-2: var(--lime);
-  --chart-3: #6cc4ff;
-  --chart-4: #8ecf2c;
-  --chart-5: #ff8a4b;
-  --sidebar: var(--surface);
-  --sidebar-foreground: #f5f7fa;
+  --chart-2: #8fd117;
+  --chart-3: #7aa2ff;
+  --chart-4: #ffb020;
+  --chart-5: #ff7a59;
+  --sidebar: #ffffff;
+  --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--blue);
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: var(--surface-2);
-  --sidebar-accent-foreground: #f5f7fa;
-  --sidebar-border: #262b30;
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: #e3e8fb;
   --sidebar-ring: var(--blue);
 
-  --glow-primary: 0 10px 30px -10px rgb(42 152 229 / 0.55);
-  --glow-lime: 0 10px 30px -10px rgb(186 243 63 / 0.45);
-}
-
-.dark {
-  color-scheme: dark;
+  --shadow-card: 0 10px 30px -18px rgb(11 20 55 / 0.35);
+  --shadow-float: 0 18px 44px -20px rgb(11 20 55 / 0.45);
+  --glow-primary: 0 12px 28px -12px rgb(46 107 255 / 0.6);
+  --glow-lime: 0 12px 28px -12px rgb(194 241 78 / 0.7);
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
-
   html {
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-feature-settings: "ss01", "cv01";
     -webkit-font-smoothing: antialiased;
   }
 
   h1,
   h2,
   h3 {
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
 
   ::selection {
-    background: rgb(42 152 229 / 0.45);
+    background: rgb(46 107 255 / 0.2);
   }
 
   input[type="number"]::-webkit-outer-spin-button,
@@ -165,13 +160,28 @@
 /* ---------- Surfaces ---------- */
 
 @utility ca-card {
-  background: var(--surface);
-  border-radius: 1.5rem;
+  background: var(--card);
+  border-radius: 1.75rem;
+  box-shadow: var(--shadow-card);
+}
+
+/* Dark navy block used for heroes and highlight panels. */
+@utility ca-ink {
+  background: var(--ink);
+  color: #f4f6ff;
+  border-radius: 1.75rem;
+}
+
+/* Blue block — the "Quiz" card of the reference. */
+@utility ca-blue {
+  background: var(--blue);
+  color: #ffffff;
+  border-radius: 1.75rem;
 }
 
 @utility ca-tile {
   background: var(--surface-2);
-  border-radius: 1.125rem;
+  border-radius: 1.25rem;
 }
 
 @utility ca-pill {
@@ -196,9 +206,14 @@
   color: #fff;
 }
 
+@utility ca-pill-soft {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 @utility ca-pill-dark {
   background: var(--surface-2);
-  color: var(--foreground);
+  color: var(--ink);
 }
 
 @utility ca-chip {
@@ -208,9 +223,10 @@
   border-radius: 999px;
   padding: 0.625rem 1rem;
   font-size: 0.8125rem;
-  font-weight: 600;
-  background: var(--surface);
+  font-weight: 700;
+  background: #ffffff;
   color: var(--muted-foreground);
+  box-shadow: var(--shadow-card);
   transition:
     background 0.15s ease,
     color 0.15s ease,
@@ -228,7 +244,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   background: var(--surface-2);
   padding: 0.875rem 1rem;
 }
@@ -240,9 +256,9 @@
   background: var(--surface-2);
   padding: 0.625rem 0;
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--foreground);
+  color: var(--ink);
   cursor: pointer;
   transition:
     background 0.15s ease,
@@ -256,15 +272,16 @@
 }
 
 @utility ca-slot-disabled {
-  opacity: 0.35;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* Legacy utility names used across dashboards — mapped onto the new style. */
+/* Legacy utility names used across dashboards — mapped onto the current style. */
 @utility neon-panel {
-  background: var(--surface);
+  background: var(--card);
   border: 0;
-  border-radius: 1.5rem;
+  border-radius: 1.75rem;
+  box-shadow: var(--shadow-card);
 }
 
 @utility neon-glow {
@@ -280,13 +297,13 @@
 }
 
 @utility lime-text {
-  color: var(--lime);
+  color: #6f9b00;
 }
 
 @utility grid-bg {
   background-image:
-    linear-gradient(rgb(255 255 255 / 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+    linear-gradient(rgb(46 107 255 / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(46 107 255 / 0.06) 1px, transparent 1px);
   background-size: 36px 36px;
 }
 
@@ -303,35 +320,31 @@
 
 /* ---------- Leaflet ---------- */
 .leaflet-container {
-  background: #0b0e11;
+  background: #e8ecfb;
   font-family: inherit;
 }
 
-/* Dark basemap without an API key: invert OSM tiles and desaturate. */
-.hs-tiles {
-  filter: invert(1) hue-rotate(190deg) saturate(0.35) brightness(0.72) contrast(1.05);
-}
-
 .leaflet-control-attribution {
-  background: rgb(3 4 5 / 0.7) !important;
-  color: #5c646d !important;
+  background: rgb(255 255 255 / 0.8) !important;
+  color: #8a91ab !important;
   font-size: 10px;
 }
 
 .leaflet-control-attribution a {
-  color: #6f8ea8 !important;
+  color: #6b82c8 !important;
 }
 
 .leaflet-bar {
   border: 0 !important;
-  border-radius: 12px !important;
+  border-radius: 14px !important;
   overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 
 .leaflet-bar a {
-  background: var(--surface) !important;
-  color: #f5f7fa !important;
-  border-color: var(--surface-2) !important;
+  background: #ffffff !important;
+  color: var(--ink) !important;
+  border-color: #eaeefb !important;
   width: 34px !important;
   height: 34px !important;
   line-height: 34px !important;
@@ -339,6 +352,11 @@
 
 .leaflet-bar a:hover {
   background: var(--surface-2) !important;
+}
+
+/* Soften OSM tiles so the map matches the light UI. */
+.hs-tiles {
+  filter: grayscale(0.35) saturate(0.85) brightness(1.05) contrast(0.95);
 }
 
 .hs-marker {
@@ -354,15 +372,14 @@
   padding: 7px 12px;
   border-radius: 999px;
   transform: translate(-50%, -50%);
-  background: var(--surface);
-  border: 1.5px solid var(--blue);
-  color: #f5f7fa;
+  background: #ffffff;
+  color: var(--ink);
   font-family: "Montserrat", system-ui, sans-serif;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   white-space: nowrap;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.55);
+  box-shadow: 0 8px 20px rgb(11 20 55 / 0.25);
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
@@ -377,26 +394,26 @@
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--lime);
-  box-shadow: 0 0 8px var(--lime);
+  background: #8fd117;
+}
+
+.hs-pin--closed {
+  color: #8a91ab;
 }
 
 .hs-pin--closed .hs-pin-dot {
-  background: #5c646d;
-  box-shadow: none;
+  background: #c3c9dc;
 }
 
 .hs-pin--active {
   background: var(--blue);
   color: #fff;
-  border-color: var(--blue);
-  box-shadow: 0 10px 30px rgb(42 152 229 / 0.6);
+  box-shadow: 0 10px 26px rgb(46 107 255 / 0.55);
   transform: translate(-50%, -50%) scale(1.12);
 }
 
 .hs-pin--active .hs-pin-dot {
-  background: #fff;
-  box-shadow: none;
+  background: var(--lime);
 }
 
 .hs-pin--active:hover {
@@ -421,10 +438,10 @@
 
 @keyframes ca-pulse-ring {
   0% {
-    box-shadow: 0 0 0 0 rgb(186 243 63 / 0.55);
+    box-shadow: 0 0 0 0 rgb(143 209 23 / 0.55);
   }
   100% {
-    box-shadow: 0 0 0 10px rgb(186 243 63 / 0);
+    box-shadow: 0 0 0 10px rgb(143 209 23 / 0);
   }
 }
 
@@ -434,6 +451,6 @@
 
 /* Sonner toasts */
 [data-sonner-toaster] [data-sonner-toast] {
-  border-radius: 1rem !important;
+  border-radius: 1.25rem !important;
   font-family: "Montserrat", system-ui, sans-serif;
 }

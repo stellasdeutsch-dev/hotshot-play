@@ -1,16 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { ClipboardCheck, ScanLine, Check, Flag } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Check, ClipboardCheck, Flag, MessageCircle, ScanLine, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
 import { useI18n } from "@/lib/i18n";
-import { todayStr, type Booking, type BookingStatus } from "@/lib/mock-db";
+import { kzt, todayStr, type Booking, type BookingStatus, type Order } from "@/lib/mock-db";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RequireRole } from "@/components/RequireRole";
+import { ChatPanel } from "@/components/ChatPanel";
+import { fetchClubOrders, updateOrderStatus } from "@/lib/shop-api";
+import { fetchClubThreads, type ChatThread } from "@/lib/chat-api";
+import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/staff")({
   head: () => ({
@@ -25,10 +30,17 @@ export const Route = createFileRoute("/staff")({
   component: StaffPage,
 });
 
-const STATUS_VARIANT: Record<BookingStatus, "default" | "secondary" | "outline" | "destructive"> = {
+const STATUS_VARIANT: Record<BookingStatus, "default" | "lime" | "muted" | "destructive"> = {
   upcoming: "default",
-  active: "secondary",
-  completed: "outline",
+  active: "lime",
+  completed: "muted",
+  cancelled: "destructive",
+};
+
+const ORDER_VARIANT: Record<Order["status"], "default" | "lime" | "muted" | "destructive"> = {
+  pending: "default",
+  preparing: "lime",
+  delivered: "muted",
   cancelled: "destructive",
 };
 
@@ -86,12 +98,12 @@ function StaffInner() {
 
   const table = (list: Booking[]) =>
     list.length === 0 ? (
-      <p className="neon-panel p-8 text-center text-sm text-muted-foreground">{t("staff.empty")}</p>
+      <p className="ca-card p-8 text-center text-sm text-muted-foreground">{t("staff.empty")}</p>
     ) : (
-      <div className="neon-panel overflow-x-auto">
+      <div className="ca-card overflow-x-auto">
         <table className="w-full min-w-[560px] text-sm">
           <thead>
-            <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b border-border text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">
               <th className="p-3">{t("staff.col.guest")}</th>
               <th className="p-3">{t("staff.col.time")}</th>
               <th className="p-3">{t("staff.col.hours")}</th>
@@ -115,7 +127,7 @@ function StaffInner() {
                   {t("club.hShort")}
                 </td>
                 <td className="p-3">
-                  <span className="rounded-lg border border-primary/40 bg-primary/10 px-2 py-1 font-mono text-xs font-bold text-primary">
+                  <span className="rounded-full bg-secondary px-2.5 py-1 font-mono text-xs font-extrabold text-primary">
                     {b.code}
                   </span>
                 </td>
@@ -144,9 +156,9 @@ function StaffInner() {
       </div>
 
       {/* Code verification */}
-      <section className="neon-panel p-5 sm:p-6">
+      <section className="ca-card p-5 sm:p-6">
         <p className="flex items-center gap-2 text-sm font-semibold">
-          <ScanLine className="size-4 text-accent" /> {t("staff.verify")}
+          <ScanLine className="size-4 text-primary" /> {t("staff.verify")}
         </p>
         <div className="mt-3 flex max-w-sm gap-2">
           <Input
@@ -162,8 +174,8 @@ function StaffInner() {
         </div>
         {found === "none" && <p className="mt-3 text-sm text-destructive">{t("staff.notfound")}</p>}
         {found && found !== "none" && (
-          <div className="mt-4 flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card/60 p-4">
-            <span className="rounded-lg border border-primary/40 bg-primary/10 px-2.5 py-1.5 font-mono text-sm font-bold text-primary">
+          <div className="ca-tile mt-4 flex flex-wrap items-center gap-4 p-4">
+            <span className="rounded-full bg-secondary px-3 py-1.5 font-mono text-sm font-extrabold text-primary">
               {found.code}
             </span>
             <div className="text-sm">
@@ -187,6 +199,12 @@ function StaffInner() {
           <TabsTrigger value="upcoming">
             {t("staff.upcoming")} ({upcomingList.length})
           </TabsTrigger>
+          <TabsTrigger value="orders">
+            <ShoppingBag /> {t("staff.tab.orders")}
+          </TabsTrigger>
+          <TabsTrigger value="chat">
+            <MessageCircle /> {t("staff.tab.chat")}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="today" className="mt-4">
           {table(todayList)}
@@ -194,7 +212,210 @@ function StaffInner() {
         <TabsContent value="upcoming" className="mt-4">
           {table(upcomingList)}
         </TabsContent>
+        <TabsContent value="orders" className="mt-4">
+          {club && <OrdersTab clubId={club.id} />}
+        </TabsContent>
+        <TabsContent value="chat" className="mt-4">
+          {club && (
+            <ClubChatTab clubId={club.id} clubName={club.name} staffName={user?.name ?? ""} />
+          )}
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+/* ------------------------------ Orders ------------------------------ */
+
+function OrdersTab({ clubId }: { clubId: string }) {
+  const { t } = useI18n();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setOrders(await fetchClubOrders(clubId));
+  }, [clubId]);
+
+  useEffect(() => {
+    void load();
+    const id = window.setInterval(() => void load(), 20_000);
+    return () => window.clearInterval(id);
+  }, [load]);
+
+  const act = async (order: Order, status: Order["status"]) => {
+    setBusy(order.id);
+    await updateOrderStatus(order, status);
+    setBusy(null);
+    await load();
+  };
+
+  const open = orders.filter((o) => o.status === "pending" || o.status === "preparing");
+  const past = orders.filter((o) => o.status === "delivered" || o.status === "cancelled");
+
+  if (orders.length === 0) {
+    return (
+      <p className="ca-card p-8 text-center text-sm font-semibold text-muted-foreground">
+        {t("staff.ordersEmpty")}
+      </p>
+    );
+  }
+
+  const row = (o: Order) => (
+    <div key={o.id} className="ca-card flex flex-wrap items-center gap-3 p-4">
+      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-secondary text-primary">
+        <ShoppingBag className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-extrabold">
+          {o.playerName || "—"} · <span className="text-primary">{o.code}</span>
+          {o.seat !== null && (
+            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold">
+              {t("staff.seat")} {o.seat}
+            </span>
+          )}
+        </p>
+        <p className="text-xs font-semibold text-muted-foreground">
+          {o.items.map((i) => `${i.name} ×${i.qty}`).join(", ")}
+        </p>
+        {o.comment && (
+          <p className="mt-0.5 text-xs font-medium italic text-muted-foreground">“{o.comment}”</p>
+        )}
+      </div>
+      <div className="text-right">
+        <p className="font-display text-sm font-extrabold tabular">{kzt(o.totalKzt)}</p>
+        <Badge variant={ORDER_VARIANT[o.status]}>{t(`order.status.${o.status}`)}</Badge>
+      </div>
+      <div className="flex gap-2">
+        {o.status === "pending" && (
+          <Button size="sm" disabled={busy === o.id} onClick={() => void act(o, "preparing")}>
+            {t("order.toPreparing")}
+          </Button>
+        )}
+        {o.status === "preparing" && (
+          <Button
+            size="sm"
+            variant="lime"
+            disabled={busy === o.id}
+            onClick={() => void act(o, "delivered")}
+          >
+            {t("order.toDelivered")}
+          </Button>
+        )}
+        {(o.status === "pending" || o.status === "preparing") && (
+          <Button
+            size="sm"
+            variant="ghost"
+            disabled={busy === o.id}
+            onClick={() => void act(o, "cancelled")}
+          >
+            {t("order.cancel")}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-5">
+      <div className="space-y-2">{open.map(row)}</div>
+      {past.length > 0 && (
+        <div className={cn("space-y-2", open.length > 0 && "opacity-70")}>
+          <p className="text-xs font-bold text-muted-foreground">
+            {t("adminPay.noHistory").replace("—", "")}
+          </p>
+          {past.slice(0, 10).map(row)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------ Chat ------------------------------ */
+
+function ClubChatTab({
+  clubId,
+  clubName,
+  staffName,
+}: {
+  clubId: string;
+  clubName: string;
+  staffName: string;
+}) {
+  const { t, locale } = useI18n();
+  const [threads, setThreads] = useState<ChatThread[]>([]);
+  const [active, setActive] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const list = await fetchClubThreads(clubId);
+    setThreads(list);
+    setActive((cur) => cur ?? list[0]?.userId ?? null);
+  }, [clubId]);
+
+  useEffect(() => {
+    void load();
+    const id = window.setInterval(() => void load(), 20_000);
+    return () => window.clearInterval(id);
+  }, [load]);
+
+  const time = (iso: string) =>
+    new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+
+  if (threads.length === 0) {
+    return (
+      <p className="ca-card p-8 text-center text-sm font-semibold text-muted-foreground">
+        {t("chat.staffEmpty")}
+      </p>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
+      <div className="space-y-2">
+        {threads.map((th) => (
+          <button
+            key={th.userId}
+            onClick={() => setActive(th.userId)}
+            className={cn(
+              "ca-card flex w-full items-center gap-3 p-3.5 text-left",
+              active === th.userId && "ring-2 ring-primary",
+            )}
+          >
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-xs font-extrabold text-primary-foreground">
+              {(th.authorName || t("chat.guest")).slice(0, 2).toUpperCase()}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center justify-between gap-2">
+                <span className="truncate text-sm font-extrabold">
+                  {th.authorName || t("chat.guest")}
+                </span>
+                <span className="shrink-0 text-[10px] font-semibold text-muted-foreground">
+                  {time(th.lastAt)}
+                </span>
+              </span>
+              <span className="mt-0.5 flex items-center gap-2">
+                <span className="truncate text-xs font-medium text-muted-foreground">
+                  {th.lastText}
+                </span>
+                {th.unread > 0 && (
+                  <span className="grid size-5 shrink-0 place-items-center rounded-full bg-lime text-[10px] font-extrabold text-lime-foreground">
+                    {th.unread}
+                  </span>
+                )}
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
+      {active && (
+        <ChatPanel
+          clubId={clubId}
+          clubName={clubName}
+          userId={active}
+          me="club"
+          authorName={staffName || t("chat.admin")}
+          className="h-[60vh] min-h-[420px]"
+        />
+      )}
     </div>
   );
 }

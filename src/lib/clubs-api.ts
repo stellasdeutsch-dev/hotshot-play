@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import type { Club, ClubStatus } from "./mock-db";
 import { DEMO_CLUBS } from "./demo-clubs";
+import { demoEnabled } from "./demo-data";
 
 type ClubUpdate = Database["public"]["Tables"]["clubs"]["Update"];
 
@@ -19,6 +20,8 @@ type Row = {
   open_to: string;
   price_per_hour: number;
   total_seats: number;
+  vip_seats?: number | null;
+  vip_price_per_hour?: number | null;
   specs: string;
   description: string;
   cover: string;
@@ -42,6 +45,8 @@ export const rowToClub = (r: Row): Club => ({
   openTo: r.open_to,
   pricePerHour: r.price_per_hour,
   totalSeats: r.total_seats,
+  vipSeats: r.vip_seats ?? 0,
+  vipPricePerHour: r.vip_price_per_hour ?? 0,
   specs: r.specs,
   description: r.description,
   cover: r.cover,
@@ -50,8 +55,6 @@ export const rowToClub = (r: Row): Club => ({
   appliedAt: r.applied_at?.slice(0, 10),
   ...(r.rejection_reason ? { rejectionReason: r.rejection_reason } : {}),
 });
-
-const demoEnabled = () => import.meta.env.DEV || import.meta.env["VITE_DEMO_CLUBS"] === "1";
 
 export async function fetchClubs(): Promise<Club[]> {
   const { data, error } = await supabase
@@ -78,6 +81,8 @@ export const clubPatchToRow = (patch: Partial<Club>): ClubUpdate => {
   if (patch.openTo !== undefined) row.open_to = patch.openTo;
   if (patch.pricePerHour !== undefined) row.price_per_hour = patch.pricePerHour;
   if (patch.totalSeats !== undefined) row.total_seats = patch.totalSeats;
+  if (patch.vipSeats !== undefined) row.vip_seats = patch.vipSeats;
+  if (patch.vipPricePerHour !== undefined) row.vip_price_per_hour = patch.vipPricePerHour;
   if (patch.specs !== undefined) row.specs = patch.specs;
   if (patch.description !== undefined) row.description = patch.description;
   if (patch.cover !== undefined) row.cover = patch.cover;

@@ -20,6 +20,10 @@ export interface User {
 
 export type ClubStatus = "pending" | "active" | "rejected" | "suspended";
 
+/** Seat zones: the shared hall and the VIP room. */
+export type Zone = "standard" | "vip";
+export const ZONES: Zone[] = ["standard", "vip"];
+
 export interface Club {
   id: string;
   name: string;
@@ -34,6 +38,10 @@ export interface Club {
   openTo: string;
   pricePerHour: number;
   totalSeats: number;
+  /** Seats inside the VIP room (subset of totalSeats); 0 = no VIP zone. */
+  vipSeats: number;
+  /** VIP hourly price; 0 = same as pricePerHour. */
+  vipPricePerHour: number;
   specs: string;
   description: string;
   cover: string;
@@ -67,6 +75,70 @@ export interface Booking {
   startTime: string; // HH:MM
   hours: number;
   status: BookingStatus;
+  zone: Zone;
+  /** PC number inside the club (1-based); null for legacy bookings. */
+  seat: number | null;
+}
+
+// ---------------- Shop ----------------
+
+export const PRODUCT_CATEGORIES = ["drinks", "snacks", "food", "icecream", "desserts"] as const;
+export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
+
+export interface Product {
+  id: string;
+  clubId: string;
+  category: ProductCategory;
+  name: string;
+  description: string;
+  sizeLabel: string;
+  priceKzt: number;
+  oldPriceKzt: number | null;
+  imageUrl: string;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export type OrderStatus = "pending" | "preparing" | "delivered" | "cancelled";
+
+export interface OrderItem {
+  productId: string;
+  name: string;
+  priceKzt: number;
+  qty: number;
+}
+
+export interface Order {
+  id: string;
+  code: string;
+  userId: string;
+  clubId: string;
+  bookingId: string | null;
+  seat: number | null;
+  playerName: string;
+  items: OrderItem[];
+  totalKzt: number;
+  comment: string;
+  status: OrderStatus;
+  createdAt: string;
+}
+
+/** Generates a short order code such as "OR-3170". */
+export const makeOrderCode = () => `OR-${Math.floor(1000 + Math.random() * 8999)}`;
+
+// ---------------- Chat ----------------
+
+export type ChatSender = "player" | "club";
+
+export interface ChatMessage {
+  id: string;
+  clubId: string;
+  userId: string;
+  sender: ChatSender;
+  authorName: string;
+  text: string;
+  createdAt: string; // ISO
+  readAt: string | null;
 }
 
 /** Player subscription tier (clubs use the software for free). */

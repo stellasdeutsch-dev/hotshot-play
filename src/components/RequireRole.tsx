@@ -15,16 +15,16 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
   if (loading) {
     return (
       <div className="ca-card mx-auto max-w-md animate-pulse p-8">
-        <div className="mx-auto size-12 rounded-full bg-surface-2" />
-        <div className="mx-auto mt-4 h-4 w-40 rounded-full bg-surface-2" />
-        <div className="mx-auto mt-2 h-3 w-56 rounded-full bg-surface-2" />
+        <div className="mx-auto size-12 rounded-full bg-secondary" />
+        <div className="mx-auto mt-4 h-4 w-40 rounded-full bg-secondary" />
+        <div className="mx-auto mt-2 h-3 w-56 rounded-full bg-secondary" />
       </div>
     );
   }
 
   return (
     <div className="ca-card ca-rise mx-auto max-w-md p-8 text-center">
-      <span className="mx-auto grid size-14 place-items-center rounded-full bg-primary/15 text-primary">
+      <span className="mx-auto grid size-14 place-items-center rounded-full bg-primary text-primary-foreground">
         <Lock className="size-6" />
       </span>
       <h1 className="font-display mt-4 text-xl font-extrabold">

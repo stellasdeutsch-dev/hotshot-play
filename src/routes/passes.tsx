@@ -52,9 +52,7 @@ function PassesPage() {
     <div className="space-y-6">
       <section className="flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-xl">
-          <span className="ca-pill ca-pill-dark">
-            <span className="size-1.5 rounded-full bg-lime" /> {t("passes.badge")}
-          </span>
+          <span className="ca-pill ca-pill-lime">{t("passes.badge")}</span>
           <h1 className="font-display mt-3 text-3xl font-extrabold leading-[1.05] sm:text-4xl">
             {t("passes.title1")} <span className="text-primary">{t("passes.title2")}</span>
           </h1>
@@ -98,7 +96,7 @@ function PassesPage() {
       )}
 
       {role === "player" && pending && (
-        <section className="rounded-3xl border border-primary/40 bg-primary/10 p-4 text-sm sm:p-5">
+        <section className="ca-card border-2 border-primary/30 p-4 text-sm sm:p-5">
           <p className="font-bold text-primary">{t("kaspi.pendingTitle")}</p>
           <p className="mt-1 text-muted-foreground">
             {t("kaspi.pendingText")} · {t("kaspi.receipt")}:{" "}
@@ -108,7 +106,7 @@ function PassesPage() {
       )}
 
       {role === "player" && lastPayment?.status === "rejected" && (
-        <section className="rounded-3xl border border-destructive/40 bg-destructive/10 p-4 text-sm sm:p-5">
+        <section className="ca-card border-2 border-destructive/30 p-4 text-sm sm:p-5">
           <p className="font-bold text-destructive">{t("kaspi.rejectedTitle")}</p>
           <p className="mt-1 text-muted-foreground">
             {lastPayment.rejectionReason || t("kaspi.rejectedText")}
@@ -126,7 +124,7 @@ function PassesPage() {
               <div
                 key={plan.id}
                 className={cn(
-                  "ca-card ca-rise relative flex flex-col p-5 transition-transform hover:-translate-y-0.5",
+                  "ca-card ca-rise relative flex flex-col p-5 transition-transform hover:-translate-y-1",
                   plan.highlight && "ring-2 ring-primary",
                 )}
                 style={{ animationDelay: `${i * 50}ms` }}
@@ -153,7 +151,7 @@ function PassesPage() {
                     ≈ {kzt(perHour)} {t("passes.perHour")}
                   </span>
                 ) : (
-                  <span className="ca-pill ca-pill-dark mt-2 w-fit text-lime">
+                  <span className="ca-pill ca-pill-lime mt-2 w-fit">
                     <InfinityIcon className="size-3.5" /> {t("passes.unlimited")}
                   </span>
                 )}
@@ -170,7 +168,7 @@ function PassesPage() {
                 <Button
                   className="mt-5 w-full"
                   size="lg"
-                  variant={plan.highlight ? "default" : "secondary"}
+                  variant={plan.highlight ? "lime" : "secondary"}
                   disabled={pending}
                   onClick={() => startBuy(plan)}
                 >
@@ -192,7 +190,7 @@ function PassesPage() {
             const res = await submitKaspiReceipt(payPlan.id, receiptNumber);
             if (res.ok) {
               setPayPlan(null);
-              toast.success(t("kaspi.submitted"));
+              toast.success(res.demo ? t("passes.bought") : t("kaspi.submitted"));
             } else {
               toast.error(
                 res.error === "alreadyPending" ? t("kaspi.alreadyPending") : t("kaspi.failed"),
@@ -208,7 +206,7 @@ function PassesPage() {
 function Perk({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-center gap-2">
-      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-lime/15 text-lime">
+      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-lime text-lime-foreground">
         <Check className="size-3" />
       </span>
       {children}

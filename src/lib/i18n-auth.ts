@@ -9,7 +9,8 @@ export const authEn: Record<string, string> = {
   "auth.register": "Create account",
   "auth.registerClub": "Submit application",
   "auth.playerHint": "Sign up with email — we send a confirmation link, no moderation needed.",
-  "auth.clubHint": "Leave your club name, email and phone — we will contact you and set the club up together.",
+  "auth.clubHint":
+    "Leave your club name, email and phone — we will contact you and set the club up together.",
   "auth.clubSection": "Club details",
   "auth.clubName": "Club name",
   "auth.address": "Address",
@@ -20,7 +21,8 @@ export const authEn: Record<string, string> = {
   "auth.specs": "Hardware",
   "auth.desc": "Description",
   "auth.checkEmail": "Check your email",
-  "auth.checkEmailHint": "We sent a confirmation link to {email}. Open it to activate your account.",
+  "auth.checkEmailHint":
+    "We sent a confirmation link to {email}. Open it to activate your account.",
   "auth.checkEmailClub": "After confirming your email your application goes to the moderators.",
   "auth.resend": "Resend the email",
   "auth.resent": "Email sent again",
@@ -33,7 +35,8 @@ export const authEn: Record<string, string> = {
 
   "status.rejected": "Rejected",
   "club.pendingTitle": "Application under review",
-  "club.pendingText": "Moderators are reviewing your club. It stays hidden from players until approved.",
+  "club.pendingText":
+    "Moderators are reviewing your club. It stays hidden from players until approved.",
   "club.rejectedTitle": "Application rejected",
   "club.rejectedText": "Reason: {reason}. Update the club details and resubmit.",
   "club.resubmit": "Resubmit application",
@@ -55,7 +58,8 @@ export const authRu: Record<string, string> = {
   "auth.register": "Создать аккаунт",
   "auth.registerClub": "Отправить заявку",
   "auth.playerHint": "Регистрация по почте — придёт ссылка-подтверждение, модерация не нужна.",
-  "auth.clubHint": "Оставьте название клуба, почту и телефон — мы свяжемся и настроим клуб вместе с вами.",
+  "auth.clubHint":
+    "Оставьте название клуба, почту и телефон — мы свяжемся и настроим клуб вместе с вами.",
   "auth.clubSection": "Данные клуба",
   "auth.clubName": "Название клуба",
   "auth.address": "Адрес",
@@ -66,7 +70,8 @@ export const authRu: Record<string, string> = {
   "auth.specs": "Железо",
   "auth.desc": "Описание",
   "auth.checkEmail": "Проверьте почту",
-  "auth.checkEmailHint": "Мы отправили ссылку-подтверждение на {email}. Откройте её, чтобы активировать аккаунт.",
+  "auth.checkEmailHint":
+    "Мы отправили ссылку-подтверждение на {email}. Откройте её, чтобы активировать аккаунт.",
   "auth.checkEmailClub": "После подтверждения почты заявка уйдёт на модерацию.",
   "auth.resend": "Отправить письмо повторно",
   "auth.resent": "Письмо отправлено снова",
@@ -79,7 +84,8 @@ export const authRu: Record<string, string> = {
 
   "status.rejected": "Отклонён",
   "club.pendingTitle": "Заявка на модерации",
-  "club.pendingText": "Суперадмин проверяет ваш клуб. До одобрения он не виден игрокам и не показан на карте.",
+  "club.pendingText":
+    "Суперадмин проверяет ваш клуб. До одобрения он не виден игрокам и не показан на карте.",
   "club.rejectedTitle": "Заявка отклонена",
   "club.rejectedText": "Причина: {reason}. Исправьте данные клуба и подайте заявку снова.",
   "club.resubmit": "Подать заявку снова",
@@ -101,7 +107,8 @@ export const authKk: Record<string, string> = {
   "auth.register": "Аккаунт құру",
   "auth.registerClub": "Өтінім жіберу",
   "auth.playerHint": "Пошта арқылы тіркелу — растау сілтемесі келеді, модерация қажет емес.",
-  "auth.clubHint": "Клуб атауын, поштаңыз бен телефоныңызды қалдырыңыз — біз хабарласып, клубты бірге баптаймыз.",
+  "auth.clubHint":
+    "Клуб атауын, поштаңыз бен телефоныңызды қалдырыңыз — біз хабарласып, клубты бірге баптаймыз.",
   "auth.clubSection": "Клуб деректері",
   "auth.clubName": "Клуб атауы",
   "auth.address": "Мекенжай",
@@ -112,7 +119,8 @@ export const authKk: Record<string, string> = {
   "auth.specs": "Жабдық",
   "auth.desc": "Сипаттама",
   "auth.checkEmail": "Поштаңызды тексеріңіз",
-  "auth.checkEmailHint": "{email} поштасына растау сілтемесін жібердік. Аккаунтты іске қосу үшін ашыңыз.",
+  "auth.checkEmailHint":
+    "{email} поштасына растау сілтемесін жібердік. Аккаунтты іске қосу үшін ашыңыз.",
   "auth.checkEmailClub": "Пошта расталған соң өтінім модерацияға жіберіледі.",
   "auth.resend": "Хатты қайта жіберу",
   "auth.resent": "Хат қайта жіберілді",
@@ -125,7 +133,8 @@ export const authKk: Record<string, string> = {
 
   "status.rejected": "Қабылданбады",
   "club.pendingTitle": "Өтінім модерацияда",
-  "club.pendingText": "Суперадмин клубыңызды тексеруде. Мақұлданғанға дейін ойыншыларға көрінбейді.",
+  "club.pendingText":
+    "Суперадмин клубыңызды тексеруде. Мақұлданғанға дейін ойыншыларға көрінбейді.",
   "club.rejectedTitle": "Өтінім қабылданбады",
   "club.rejectedText": "Себебі: {reason}. Деректерді түзетіп, қайта жіберіңіз.",
   "club.resubmit": "Өтінімді қайта жіберу",
