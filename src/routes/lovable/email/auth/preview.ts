@@ -18,7 +18,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 };
 
 // Configuration
-const SITE_NAME = "HotShot Pass";
+const SITE_NAME = "HeadShotPlay";
 const ROOT_DOMAIN = "headshotkz.app";
 
 // Sample data for preview mode ONLY (not used in actual email sending).

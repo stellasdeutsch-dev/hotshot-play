@@ -1,5 +1,5 @@
 /**
- * HotShot Play — domain types + subscription catalogue.
+ * HeadShotPlay — domain types + subscription catalogue.
  * All entities (clubs, bookings, subscriptions, reviews, payments) live in the
  * database; this module only holds shared types, the plan catalogue and helpers.
  */

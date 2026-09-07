@@ -1,6 +1,6 @@
-# HotShot Pass
+# HeadShotPlay
 
-Create a full-stack multi-tenant web application named "HotShot Play" — a unified platform and aggregator for computer clubs in Kazakhstan (starting in Astana, scalable to CIS).
+Create a full-stack multi-tenant web application named "HeadShotPlay" — a unified platform and aggregator for computer clubs in Kazakhstan (starting in Astana, scalable to CIS).
 
 ### Core Architecture & Roles:
 
@@ -10,7 +10,7 @@ Create a full-stack multi-tenant web application named "HotShot Play" — a unif
 
    - PC/Console seat selection and booking system for specific time slots.
 
-   - **Universal Subscriptions & Passes:** Purchase of "HotShot Play Passes" (gaming hours valid across all partner clubs, inspired by fitness aggregation models like 1Fit) and individual club packages.
+   - **Universal Subscriptions & Passes:** Purchase of "HeadShotPlay Passes" (gaming hours valid across all partner clubs, inspired by fitness aggregation models like 1Fit) and individual club packages.
 
    - **QR Check-in:** Digital pass with a dynamic QR code to scan at the club entrance to start and stop the gaming session.
 

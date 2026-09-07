@@ -37,12 +37,12 @@ import {
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Суперадмин — HotShot Play" },
+      { title: "Суперадмин — HeadShotPlay" },
       {
         name: "description",
-        content: "Модерация клубов, пользователи и выручка платформы HotShot Play.",
+        content: "Модерация клубов, пользователи и выручка платформы HeadShotPlay.",
       },
-      { property: "og:title", content: "HotShot Play — панель суперадмина" },
+      { property: "og:title", content: "HeadShotPlay — панель суперадмина" },
       { property: "og:description", content: "Заявки клубов, пользователи и аналитика платформы." },
       { property: "og:type", content: "website" },
     ],

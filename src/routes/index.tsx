@@ -37,13 +37,13 @@ const ClubMap = lazy(() => import("@/components/ClubMap"));
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "HotShot Play — карта компьютерных клубов Астаны" },
+      { title: "HeadShotPlay — карта компьютерных клубов Астаны" },
       {
         name: "description",
         content:
           "Все компьютерные клубы Астаны на одной карте: бронируйте места часами абонемента и заходите по короткому коду.",
       },
-      { property: "og:title", content: "HotShot Play — все клубы на одной карте" },
+      { property: "og:title", content: "HeadShotPlay — все клубы на одной карте" },
       {
         property: "og:description",
         content: "Найдите клуб, выберите время и забронируйте место за секунды.",

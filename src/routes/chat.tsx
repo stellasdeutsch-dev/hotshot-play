@@ -17,12 +17,12 @@ export const Route = createFileRoute("/chat")({
     typeof s["club"] === "string" ? { club: s["club"] } : {},
   head: () => ({
     meta: [
-      { title: "Чат с клубом — HotShot Play" },
+      { title: "Чат с клубом — HeadShotPlay" },
       {
         name: "description",
         content: "Напишите администратору клуба: вопросы по броням, заказам и оборудованию.",
       },
-      { property: "og:title", content: "HotShot Play — чат с клубом" },
+      { property: "og:title", content: "HeadShotPlay — чат с клубом" },
       { property: "og:description", content: "Прямая связь с администратором зала." },
       { property: "og:type", content: "website" },
     ],

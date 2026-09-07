@@ -35,12 +35,12 @@ export const Route = createFileRoute("/shop")({
     typeof s["club"] === "string" ? { club: s["club"] } : {},
   head: () => ({
     meta: [
-      { title: "Магазин — HotShot Play" },
+      { title: "Магазин — HeadShotPlay" },
       {
         name: "description",
         content: "Закажите напитки, снеки и еду прямо к игровому месту в клубе.",
       },
-      { property: "og:title", content: "HotShot Play — заказ к игровому месту" },
+      { property: "og:title", content: "HeadShotPlay — заказ к игровому месту" },
       { property: "og:description", content: "Напитки и еда с доставкой к вашему компьютеру." },
       { property: "og:type", content: "website" },
     ],

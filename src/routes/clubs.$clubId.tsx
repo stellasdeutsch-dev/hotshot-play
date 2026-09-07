@@ -40,9 +40,9 @@ import { SeatPicker } from "@/components/SeatPicker";
 export const Route = createFileRoute("/clubs/$clubId")({
   head: () => ({
     meta: [
-      { title: "Клуб — HotShot Play" },
+      { title: "Клуб — HeadShotPlay" },
       { name: "description", content: "Бронирование игровых мест, отзывы и цены клуба." },
-      { property: "og:title", content: "HotShot Play — бронирование клуба" },
+      { property: "og:title", content: "HeadShotPlay — бронирование клуба" },
       {
         property: "og:description",
         content: "Выберите дату, время и компьютер, оплатите часами абонемента.",

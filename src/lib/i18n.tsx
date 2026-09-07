@@ -27,7 +27,7 @@ const en: Dict = {
   "shell.hoursLeft": "Hours",
   "lang.label": "Language",
 
-  "auth.title": "Sign in to HotShot Play",
+  "auth.title": "Sign in to HeadShotPlay",
   "auth.subtitle": "One account for players, club staff, owners and moderators.",
   "auth.email": "Email",
   "auth.password": "Password",
@@ -179,7 +179,7 @@ const en: Dict = {
   "partner.title": "Owner dashboard",
   "partner.subtitle": "Finance, reviews and settings of your club",
   "partner.free":
-    "HotShot Play is free for clubs — you keep 100% of the hall revenue. We monetize player subscriptions.",
+    "HeadShotPlay is free for clubs — you keep 100% of the hall revenue. We monetize player subscriptions.",
   "partner.kpi.revenue": "Revenue (7 days)",
   "partner.kpi.bookings": "Bookings (7 days)",
   "partner.kpi.rating": "Rating",
@@ -189,7 +189,7 @@ const en: Dict = {
   "partner.tab.reviews": "Reviews",
   "partner.tab.staff": "Staff",
   "partner.kpi.month": "Revenue this month",
-  "partner.staffHint": "Add club staff by the e-mail of their registered HotShot Play account.",
+  "partner.staffHint": "Add club staff by the e-mail of their registered HeadShotPlay account.",
   "partner.staffAdd": "Add",
   "partner.staffAdded": "Staff member added",
   "partner.staffRemoved": "Staff member removed",
@@ -316,7 +316,7 @@ const ru: Dict = {
   "shell.hoursLeft": "Часы",
   "lang.label": "Язык",
 
-  "auth.title": "Вход в HotShot Play",
+  "auth.title": "Вход в HeadShotPlay",
   "auth.subtitle": "Один аккаунт для игроков, персонала клубов, владельцев и модераторов.",
   "auth.email": "Email",
   "auth.password": "Пароль",
@@ -467,7 +467,7 @@ const ru: Dict = {
   "partner.title": "Кабинет владельца",
   "partner.subtitle": "Финансы, отзывы и настройки вашего клуба",
   "partner.free":
-    "HotShot Play бесплатен для клубов — вы сохраняете 100% выручки зала. Мы зарабатываем на абонементах игроков.",
+    "HeadShotPlay бесплатен для клубов — вы сохраняете 100% выручки зала. Мы зарабатываем на абонементах игроков.",
   "partner.kpi.revenue": "Выручка (7 дней)",
   "partner.kpi.bookings": "Брони (7 дней)",
   "partner.kpi.rating": "Рейтинг",
@@ -478,7 +478,7 @@ const ru: Dict = {
   "partner.tab.staff": "Сотрудники",
   "partner.kpi.month": "Выручка за месяц",
   "partner.staffHint":
-    "Добавьте сотрудника по e-mail его зарегистрированного аккаунта HotShot Play.",
+    "Добавьте сотрудника по e-mail его зарегистрированного аккаунта HeadShotPlay.",
   "partner.staffAdd": "Добавить",
   "partner.staffAdded": "Сотрудник добавлен",
   "partner.staffRemoved": "Сотрудник удалён",
@@ -605,7 +605,7 @@ const kk: Dict = {
   "shell.hoursLeft": "Сағат",
   "lang.label": "Тіл",
 
-  "auth.title": "HotShot Play-ге кіру",
+  "auth.title": "HeadShotPlay-ге кіру",
   "auth.subtitle": "Ойыншылар, клуб персоналы, иелері мен модераторларға бір аккаунт.",
   "auth.email": "Email",
   "auth.password": "Құпия сөз",
@@ -757,7 +757,7 @@ const kk: Dict = {
   "partner.title": "Иесінің кабинеті",
   "partner.subtitle": "Клубыңыздың қаржысы, пікірлері мен баптаулары",
   "partner.free":
-    "HotShot Play клубтарға тегін — зал түсімінің 100% өзіңізде қалады. Біз ойыншы жазылымдарынан табыс табамыз.",
+    "HeadShotPlay клубтарға тегін — зал түсімінің 100% өзіңізде қалады. Біз ойыншы жазылымдарынан табыс табамыз.",
   "partner.kpi.revenue": "Түсім (7 күн)",
   "partner.kpi.bookings": "Брондар (7 күн)",
   "partner.kpi.rating": "Рейтинг",
@@ -767,7 +767,7 @@ const kk: Dict = {
   "partner.tab.reviews": "Пікірлер",
   "partner.tab.staff": "Қызметкерлер",
   "partner.kpi.month": "Айлық түсім",
-  "partner.staffHint": "Қызметкерді тіркелген HotShot Play аккаунтының e-mail арқылы қосыңыз.",
+  "partner.staffHint": "Қызметкерді тіркелген HeadShotPlay аккаунтының e-mail арқылы қосыңыз.",
   "partner.staffAdd": "Қосу",
   "partner.staffAdded": "Қызметкер қосылды",
   "partner.staffRemoved": "Қызметкер жойылды",

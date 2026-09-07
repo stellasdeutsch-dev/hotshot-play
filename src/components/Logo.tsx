@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** HotShot Play mark — angled "HS" badge. */
+/** HeadShotPlay mark — angled "HS" badge. */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={cn("size-9", className)} aria-hidden fill="none">
@@ -21,7 +21,7 @@ export function LogoMark({ className }: { className?: string }) {
 export function LogoWordmark({ className }: { className?: string }) {
   return (
     <span className={cn("font-display text-lg font-extrabold tracking-tight", className)}>
-      HotShot<span className="text-primary"> Play</span>
+      HeadShot<span className="text-primary">Play</span>
     </span>
   );
 }

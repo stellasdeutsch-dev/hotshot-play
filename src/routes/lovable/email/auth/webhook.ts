@@ -9,7 +9,7 @@ import { EmailChangeEmail } from "@/lib/email-templates/email-change";
 import { ReauthenticationEmail } from "@/lib/email-templates/reauthentication";
 
 // Configuration
-const SITE_NAME = "HotShot Pass";
+const SITE_NAME = "HeadShotPlay";
 const SENDER_DOMAIN = "notify.headshotkz.app";
 const ROOT_DOMAIN = "headshotkz.app";
 const FROM_DOMAIN = "headshotkz.app";

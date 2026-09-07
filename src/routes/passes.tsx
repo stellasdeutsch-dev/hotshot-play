@@ -14,13 +14,13 @@ import { Progress } from "@/components/ui/progress";
 export const Route = createFileRoute("/passes")({
   head: () => ({
     meta: [
-      { title: "Абонементы — HotShot Play" },
+      { title: "Абонементы — HeadShotPlay" },
       {
         name: "description",
         content:
-          "Игровые абонементы HotShot Play: 11, 19, 27 часов и Безлимит во всех клубах Астаны.",
+          "Игровые абонементы HeadShotPlay: 11, 19, 27 часов и Безлимит во всех клубах Астаны.",
       },
-      { property: "og:title", content: "HotShot Play — абонементы для игроков" },
+      { property: "og:title", content: "HeadShotPlay — абонементы для игроков" },
       { property: "og:description", content: "Один абонемент — все клубы-партнёры." },
       { property: "og:type", content: "website" },
     ],

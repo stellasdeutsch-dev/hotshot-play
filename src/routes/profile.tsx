@@ -40,9 +40,9 @@ export const Route = createFileRoute("/profile")({
   }),
   head: () => ({
     meta: [
-      { title: "Профиль — HotShot Play" },
-      { name: "description", content: "Сессия, кошелёк часов и брони HotShot Play." },
-      { property: "og:title", content: "HotShot Play — профиль игрока" },
+      { title: "Профиль — HeadShotPlay" },
+      { name: "description", content: "Сессия, кошелёк часов и брони HeadShotPlay." },
+      { property: "og:title", content: "HeadShotPlay — профиль игрока" },
       { property: "og:description", content: "Таймер сессии, история операций и абонемент." },
       { property: "og:type", content: "website" },
     ],
