@@ -123,6 +123,57 @@
   --glow-lime: 0 12px 28px -12px rgb(194 241 78 / 0.7);
 }
 
+/* ---------- Dark palette ---------- */
+.dark {
+  --ink: #f2f5ff;
+  --canvas: #070b18;
+  --surface-2: #1b2440;
+  --surface-3: #2a3559;
+  --blue: #4b85ff;
+  --blue-soft: #16224a;
+  --lime: #c2f14e;
+
+  --background: var(--canvas);
+  --foreground: #eef1fa;
+  --card: #101728;
+  --card-foreground: #eef1fa;
+  --popover: #101728;
+  --popover-foreground: #eef1fa;
+  --primary: var(--blue);
+  --primary-foreground: #06122e;
+  --secondary: var(--surface-2);
+  --secondary-foreground: #eef1fa;
+  --muted: var(--surface-2);
+  --muted-foreground: #949dc0;
+  --accent: var(--lime);
+  --accent-foreground: #10182f;
+  --lime-foreground: #10182f;
+  --destructive: #ff6b6f;
+  --destructive-foreground: #1a0a0c;
+  --border: #202a47;
+  --input: #101728;
+  --ring: var(--blue);
+  --star: #ffc531;
+  --chart-1: var(--blue);
+  --chart-2: #a8e02f;
+  --chart-3: #7aa2ff;
+  --chart-4: #ffc531;
+  --chart-5: #ff8a5c;
+  --sidebar: #101728;
+  --sidebar-foreground: #eef1fa;
+  --sidebar-primary: var(--blue);
+  --sidebar-primary-foreground: #06122e;
+  --sidebar-accent: var(--surface-2);
+  --sidebar-accent-foreground: #eef1fa;
+  --sidebar-border: #202a47;
+  --sidebar-ring: var(--blue);
+
+  --shadow-card: 0 12px 34px -20px rgb(0 0 0 / 0.9);
+  --shadow-float: 0 20px 50px -22px rgb(0 0 0 / 0.95);
+  --glow-primary: 0 12px 28px -12px rgb(75 133 255 / 0.55);
+  --glow-lime: 0 12px 28px -12px rgb(194 241 78 / 0.45);
+}
+
 @layer base {
   html {
     color-scheme: light;
@@ -167,7 +218,7 @@
 
 /* Dark navy block used for heroes and highlight panels. */
 @utility ca-ink {
-  background: var(--ink);
+  background: #0b1437;
   color: #f4f6ff;
   border-radius: 1.75rem;
 }
@@ -318,6 +369,29 @@
   font-variant-numeric: tabular-nums;
 }
 
+.dark .ca-ink {
+  background: #131c38;
+}
+
+.dark .ca-chip {
+  background: var(--card);
+}
+
+.dark .grid-bg {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+}
+
+/* Pills that sit on top of a photo keep fixed colors in both themes. */
+@utility on-image {
+  color: #0b1437;
+}
+
+@utility on-image-muted {
+  color: #5b6480;
+}
+
 /* ---------- Leaflet ---------- */
 .leaflet-container {
   background: #e8ecfb;
@@ -357,6 +431,39 @@
 /* Soften OSM tiles so the map matches the light UI. */
 .hs-tiles {
   filter: grayscale(0.35) saturate(0.85) brightness(1.05) contrast(0.95);
+}
+
+.dark .leaflet-container {
+  background: #0b1020;
+}
+
+.dark .hs-tiles {
+  filter: invert(1) hue-rotate(190deg) saturate(0.4) brightness(0.78) contrast(1.05);
+}
+
+.dark .leaflet-control-attribution {
+  background: rgb(7 11 24 / 0.8) !important;
+  color: #6b7496 !important;
+}
+
+.dark .leaflet-bar a {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.dark .leaflet-bar a:hover {
+  background: var(--surface-2) !important;
+}
+
+.dark .hs-pin {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.6);
+}
+
+.dark .hs-pin--closed {
+  color: var(--muted-foreground);
 }
 
 .hs-marker {

@@ -7,8 +7,10 @@ import {
   LogOut,
   MessageCircle,
   Monitor,
+  Moon,
   ShieldCheck,
   ShoppingBag,
+  Sun,
   Ticket,
   User,
 } from "lucide-react";
@@ -18,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { LANGS, useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { useCart } from "@/lib/cart";
+import { useTheme } from "@/lib/theme";
 import { fetchUnreadForPlayer } from "@/lib/chat-api";
 import { Button } from "@/components/ui/button";
 import { LogoMark, LogoWordmark } from "@/components/Logo";
@@ -114,6 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, role, logout } = useAuth();
   const { t, lang, setLang } = useI18n();
   const { count: cartCount } = useCart();
+  const { resolved, toggle } = useTheme();
   const { pathname, tab } = useRouterState({
     select: (s) => ({
       pathname: s.location.pathname,
@@ -198,6 +202,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </button>
               ))}
             </div>
+
+            <Button
+              size="icon-sm"
+              variant="secondary"
+              onClick={toggle}
+              aria-label={t("theme.toggle")}
+              title={t("theme.toggle")}
+            >
+              {resolved === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </Button>
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2">

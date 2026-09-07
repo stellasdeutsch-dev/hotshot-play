@@ -207,6 +207,11 @@ export const uiRu: Record<string, string> = {
   "partner.p.empty": "Товаров пока нет — добавьте первый.",
   "partner.p.demo": "Магазин демо-клуба: товары нельзя редактировать.",
   "home.hello": "Привет",
+  "theme.label": "Тема",
+  "theme.light": "Светлая",
+  "theme.dark": "Тёмная",
+  "theme.system": "Как в системе",
+  "theme.toggle": "Сменить тему",
 };
 
 export const uiEn: Record<string, string> = {
@@ -415,6 +420,11 @@ export const uiEn: Record<string, string> = {
   "partner.p.empty": "No products yet — add the first one.",
   "partner.p.demo": "Demo club shop: products cannot be edited.",
   "home.hello": "Hello",
+  "theme.label": "Theme",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "theme.system": "System",
+  "theme.toggle": "Switch theme",
 };
 
 export const uiKk: Record<string, string> = {
@@ -625,4 +635,9 @@ export const uiKk: Record<string, string> = {
   "partner.p.empty": "Тауар жоқ — алғашқысын қосыңыз.",
   "partner.p.demo": "Демо-клуб дүкені: тауарларды өңдеу мүмкін емес.",
   "home.hello": "Сәлем",
+  "theme.label": "Тақырып",
+  "theme.light": "Ашық",
+  "theme.dark": "Қараңғы",
+  "theme.system": "Жүйедегідей",
+  "theme.toggle": "Тақырыпты ауыстыру",
 };

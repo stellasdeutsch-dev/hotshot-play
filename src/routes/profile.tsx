@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useStore } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
 import { LANGS, useI18n } from "@/lib/i18n";
+import { THEMES, useTheme } from "@/lib/theme";
 import { SUBSCRIPTION_PLANS, kzt, todayStr, type Booking, type BookingStatus } from "@/lib/mock-db";
 import { bookingWindow, pickCurrentBooking, sessionPhase } from "@/lib/club-utils";
 import { cn } from "@/lib/utils";
@@ -192,7 +193,7 @@ function SessionTab() {
 
           <div className="mt-6 flex flex-col items-center gap-6 sm:flex-row sm:justify-around">
             <SessionRing booking={current} size={230} tone="onBlue" />
-            <div className="w-full max-w-xs rounded-[1.5rem] bg-white p-4 text-center text-foreground">
+            <div className="on-image w-full max-w-xs rounded-[1.5rem] bg-white p-4 text-center">
               <div className="mx-auto w-fit rounded-2xl bg-white p-1">
                 <QRCodeSVG
                   value={`hotshot:${current.code}`}
@@ -202,19 +203,19 @@ function SessionTab() {
                   level="M"
                 />
               </div>
-              <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="mt-3 text-[10px] font-bold uppercase tracking-widest text-[#5b6480]">
                 {t("session.code")}
               </p>
-              <p className="font-display text-3xl font-extrabold tracking-[0.18em] text-primary">
+              <p className="font-display text-3xl font-extrabold tracking-[0.18em] text-[#2e6bff]">
                 {current.code}
               </p>
-              <p className="mt-1 text-xs font-semibold text-muted-foreground">
+              <p className="mt-1 text-xs font-semibold text-[#5b6480]">
                 {current.date} · {current.startTime} · {current.hours}
                 {t("club.hShort")}
               </p>
               {current.seat !== null && (
-                <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-xs font-extrabold">
-                  <Monitor className="size-3.5 text-primary" /> {t("seats.pc")} {current.seat}
+                <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#eef2ff] px-3 py-1 text-xs font-extrabold">
+                  <Monitor className="size-3.5 text-[#2e6bff]" /> {t("seats.pc")} {current.seat}
                 </p>
               )}
             </div>
@@ -480,6 +481,7 @@ function ProfileTab() {
   const { user, logout } = useAuth();
   const { bookings, cancelBooking, clubs } = useStore();
   const { t, lang, setLang } = useI18n();
+  const { theme, setTheme } = useTheme();
   if (!user) return null;
 
   const mine = bookings
@@ -549,6 +551,29 @@ function ProfileTab() {
                 {l.label}
               </button>
             ))}
+          </div>
+
+          <div>
+            <p className="mb-1.5 pl-1 text-xs font-bold text-muted-foreground">
+              {t("theme.label")}
+            </p>
+            <div className="flex rounded-full bg-secondary p-1 text-xs font-bold" role="group">
+              {THEMES.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setTheme(opt.value)}
+                  aria-pressed={theme === opt.value}
+                  className={cn(
+                    "flex-1 rounded-full py-2 transition-all",
+                    theme === opt.value
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {t(opt.labelKey)}
+                </button>
+              ))}
+            </div>
           </div>
 
           <Button variant="ghost" className="w-full" onClick={logout}>

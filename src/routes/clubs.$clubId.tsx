@@ -134,7 +134,7 @@ function ClubPage() {
               <span
                 className={cn(
                   "ca-pill absolute left-4 top-4",
-                  open ? "bg-lime text-lime-foreground" : "bg-white/85 text-muted-foreground",
+                  open ? "bg-lime text-lime-foreground" : "bg-white/85 on-image-muted",
                 )}
               >
                 {open ? t("club.openNow") : t("club.closedNow")}
@@ -148,7 +148,7 @@ function ClubPage() {
                     <Clock className="size-3.5" /> {hoursLabel(club, t("home.open247"))}
                   </p>
                 </div>
-                <span className="flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-sm font-extrabold">
+                <span className="on-image flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-3 py-1.5 text-sm font-extrabold">
                   <Star className="size-4 fill-star text-star" />{" "}
                   {club.rating > 0 ? club.rating.toFixed(1) : "—"}
                 </span>

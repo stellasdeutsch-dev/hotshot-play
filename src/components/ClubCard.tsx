@@ -39,19 +39,19 @@ export function ClubCard({
           <span
             className={cn(
               "ca-pill",
-              open ? "bg-lime text-lime-foreground" : "bg-white/85 text-muted-foreground",
+              open ? "bg-lime text-lime-foreground" : "bg-white/85 on-image-muted",
             )}
           >
             <span
               className={cn(
                 "size-1.5 rounded-full",
-                open ? "bg-lime-foreground/60" : "bg-muted-foreground",
+                open ? "bg-lime-foreground/60" : "bg-[#5b6480]",
               )}
             />
             {open ? t("home.openBadge") : t("home.closed")}
           </span>
           {distanceKm !== undefined && (
-            <span className="ca-pill bg-white/85 text-foreground">
+            <span className="ca-pill on-image bg-white/85">
               <MapPin className="size-3" /> {formatDistance(distanceKm)}
             </span>
           )}
@@ -60,7 +60,7 @@ export function ClubCard({
           <h3 className="font-display truncate text-[17px] font-extrabold leading-tight text-white">
             {club.name}
           </h3>
-          <span className="flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-extrabold">
+          <span className="on-image flex shrink-0 items-center gap-1 rounded-full bg-white/90 px-2 py-1 text-xs font-extrabold">
             <Star className="size-3.5 fill-star text-star" />{" "}
             {club.rating > 0 ? club.rating.toFixed(1) : "—"}
           </span>

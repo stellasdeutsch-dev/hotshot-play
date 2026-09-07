@@ -17,6 +17,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
 import { CartProvider } from "@/lib/cart";
+import { THEME_INIT_SCRIPT, ThemeProvider } from "@/lib/theme";
 
 function NotFoundComponent() {
   return (
@@ -107,7 +108,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: `${import.meta.env.BASE_URL}favicon.ico`, type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
@@ -121,6 +122,8 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="ru">
       <head>
         <HeadContent />
+        {/* Applies the stored palette before first paint to avoid a flash. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
         {children}
@@ -135,19 +138,21 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <AuthProvider>
-          <StoreProvider>
-            <CartProvider>
-              <AppShell>
-                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                <Outlet />
-              </AppShell>
-              <Toaster position="top-center" />
-            </CartProvider>
-          </StoreProvider>
-        </AuthProvider>
-      </I18nProvider>
+      <ThemeProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <StoreProvider>
+              <CartProvider>
+                <AppShell>
+                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                  <Outlet />
+                </AppShell>
+                <Toaster position="top-center" />
+              </CartProvider>
+            </StoreProvider>
+          </AuthProvider>
+        </I18nProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

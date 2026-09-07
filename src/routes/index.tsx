@@ -491,14 +491,14 @@ function MapPreview({
           <button
             onClick={onClose}
             aria-label={t("common.close")}
-            className="absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-white/90 text-foreground"
+            className="on-image absolute right-3 top-3 grid size-8 place-items-center rounded-full bg-white/90"
           >
             <X className="size-4" />
           </button>
           <span
             className={cn(
               "ca-pill absolute left-3 top-3",
-              open ? "bg-lime text-lime-foreground" : "bg-white/85 text-muted-foreground",
+              open ? "bg-lime text-lime-foreground" : "bg-white/85 on-image-muted",
             )}
           >
             {open ? t("home.openBadge") : t("home.closed")}
